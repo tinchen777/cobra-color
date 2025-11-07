@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "term-tz"
+version = "0.1.0"
+description = "A Python library for enhanced terminal display."
+readme = "README.md"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Zhen Tian", email = "zhen.tian.cs@gmail.com"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "torch"
+]
+
+[project.urls]
+Homepage = "https://github.com/tinchen777/term-tz.git"
+Repository = "https://github.com/tinchen777/term-tz.git"
+Issues = "https://github.com/tinchen777/term-tz.git/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["term_tz*"]
