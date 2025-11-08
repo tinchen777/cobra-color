@@ -10,17 +10,24 @@ _Example:_
 """
 from .color import ctext
 from .format import dict_print, list_print
-from .draw import (color_font, printable_image, BinaryImage, render_image)
+from .draw import (
+    color_font,
+    printable_image,
+    render_image,
+    create_binary_image,
+    FontName
+)
 
 __author__ = "Zhen Tian"
 __version__ = "0.1.0"
 
 __all__ = [
     "ctext",
+    "FontName",
     "color_font",
     "printable_image",
-    "BinaryImage",
     "render_image",
+    "create_binary_image",
     "dict_print",
     "list_print"
 ]

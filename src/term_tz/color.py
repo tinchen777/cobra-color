@@ -82,7 +82,7 @@ class ColorStr(str):
     r"""
     A string class that supports ANSI color and style formatting while preserving plain text.
 
-    NOTE: Same format and rules as `ctext()`.
+    NOTE: Usage same as `str`, with extra property `plain` to get the plain text.
     """
     def __new__(
         cls,
@@ -149,7 +149,10 @@ class ColorStr(str):
         styles: Iterable[StyleName]
     ) -> str:
         # styles
-        font_styles = ";".join(str(_STYLE_CODE[s]) for s in styles if s in _STYLE_CODE)
+        if isinstance(styles, Iterable):
+            font_styles = ";".join(str(_STYLE_CODE[s]) for s in styles if s in _STYLE_CODE)
+        else:
+            font_styles = ""
         # foreground
         foreground = "" if fg is None else ColorStr._parse_color(fg, is_fg=True)
         # background

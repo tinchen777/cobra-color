@@ -33,12 +33,7 @@ def printable_image(
             - `None`: Use original height, unless `width` is specified to maintain aspect ratio.
 
         mode : ImgFillingModeName, default to `"half-color"`
-            The rendering mode, which can be one of the following:
-            - `"ascii"`: Render using ASCII characters, mapping pixel brightness to characters in `charset`.
-            - `"color"`: Render using full block characters with color.
-            - `"half-color"`: Render using half block characters with color, combining two pixels vertically.
-            - `"gray"`: Render using full block characters in grayscale.
-            - `"half-gray"`: Render using half block characters in grayscale, combining two pixels vertically.
+            The rendering mode. ~see `render_image` for details.
 
         charset : str, default to `"@%#*+=-:. "`
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
@@ -46,9 +41,10 @@ def printable_image(
     Returns
     -------
         str
-            String representation of the rendered image.
+            String representation of the rendered image, use print() to display.
     """
     img = Image.open(img_path)
+
     aspect_ratio = img.height / img.width
     if height is not None or width is not None:
         if height is None and width is not None:

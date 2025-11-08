@@ -14,28 +14,7 @@ def dict_print(
     class_name: Optional[str] = None,
     display: bool = True
 ):
-    r"""
-    Info
-    ----
-        打印字典
 
-    Params
-    ----
-        __target_dict (_dict[str, Any]_): 需要打印的字典
-
-        omit_items (_list[str]_): 将包含的键值对应的字典值替换为`"PLACEHOLDER"`
-
-        title (_str_): 打印的标题
-
-        class_name (_Optional[str]_): (_str_): 类成员变量模式
-                `None`: 一般模式
-
-        display (_bool_): 是否直接显示
-
-    Return
-    ----
-        `str`
-    """
     if isinstance(target, Mapping) and target:
         str_return = ctext(title, fg="d", bg="y", styles={"bold"})
         if class_name:
@@ -105,24 +84,29 @@ def dict_print(
 
 def list_print(target: Sequence[Any], display: bool = True):
     r"""
-    Info
-    ----
-        打印列表
+    Print a list with index for each item.
 
-    Params
-    ----
-        __list (_list[Any]_): 目标列表
+    Parameters
+    ----------
+        target : Sequence[Any]
+            The Sequence to be printed.
 
-        display (_bool_): 是否直接显示
+        display : bool, default to `True`
+            Whether to print the formatted string to the terminal.
+
+    Returns
+    -------
+        str
+            The formatted string representation of the list.
     """
-    str_return = ""
-    if target and isinstance(target, list):
+    lines = []
+    if target and isinstance(target, Sequence):
+        indent = len(str(len(target)))
         for idex, item in enumerate(target, start=1):
-            item_str = ctext(str(item), fg="w")
-            str_return += f"#{idex}{' ' if idex<10 else ''} {item_str}\n"
-        str_return.rstrip("\n")
+            lines.append(f"#{str(idex).zfill(indent)} {item}")
+    result = "\n".join(lines)
 
-    if display and str_return:
-        print(str_return)
+    if display and result:
+        print(result)
 
-    return str_return
+    return result
