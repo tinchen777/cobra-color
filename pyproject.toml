@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cobra-color"
-version = "0.2.0"
+dynamic = ["version"]
 description = "A Python library for enhanced terminal display."
 readme = "README.md"
 license-files = ["LICENSE"]
@@ -22,9 +22,15 @@ Homepage = "https://github.com/tinchen777/cobra-color.git"
 Repository = "https://github.com/tinchen777/cobra-color.git"
 Issues = "https://github.com/tinchen777/cobra-color.git/issues"
 
+[tool.setuptools.dynamic]
+version = {attr = "cobra_color.__version__"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["cobra_color*"]
 
 [tool.setuptools.package-data]
-cobra_color.draw.fonts = ["*.ttf"]
+cobra_color = [
+    "draw/fonts/*.ttf",
+    "draw/fonts/*.TTF"
+]
