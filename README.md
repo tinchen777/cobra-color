@@ -1,11 +1,11 @@
 <div align="center">
 
-<h2 id="title">cobra-color</h2>
+<h2 id="title">🐱‍👤 cobra-color 🐱‍👤</h2>
 
-[![Build](https://github.com/tinchen777/cobra-color/actions/workflows/tests.yml/badge.svg)](https://github.com/tinchen777/cobra-color/actions/workflows/tests.yml)
 [![PyPI version](https://img.shields.io/pypi/v/cobra-color.svg)](https://pypi.org/project/cobra-color/)
-![Python Versions](https://img.shields.io/pypi/pyversions/cobra-color.svg)
+![Python](https://img.shields.io/pypi/pyversions/cobra-color.svg)
 ![License](https://img.shields.io/github/license/tinchen777/cobra-color.svg)
+
 [![Pull Requests Welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)](https://github.com/tinchen777/cobra-color/pulls)
 ![Github stars](https://img.shields.io/github/stars/tinchen777/cobra-color.svg)
 
