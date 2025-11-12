@@ -20,9 +20,9 @@ A lightweight Python library for enhanced terminal display: simple text color/st
 
 ## Features
 
-- :rocket: Concise color/style names for terminal text.
-- :rocket: Image rendering in multiple modes: ASCII, color, half-color, gray, half-gray.
-- :rocket: Minimal dependencies and easy integration.
+- 🚀 Concise color/style names for terminal text.
+- 🚀 Image rendering in multiple modes: ASCII, color, half-color, gray, half-gray.
+- 🚀 Minimal dependencies and easy integration.
 
 ## Installation
 
@@ -69,19 +69,19 @@ pip install cobra-color
 
 ## Image Modes
 
-- ascii: monochrome ASCII using a density charset.
-- color: colorized character fill.
-- half-color: half-block characters with color (higher density, good visual quality).
-- gray: grayscale characters.
-- half-gray: half-block grayscale.
+- `ascii`: monochrome ASCII using a density charset.
+- `color`: colorized character fill.
+- `half-color`: half-block characters with color (higher density, good visual quality).
+- `gray`: grayscale characters.
+- `half-gray`: half-block grayscale.
 
 Tip: For best results, use a TrueColor-capable terminal and a monospaced font.
 
 ## Requirements
 
 - Python >= 3.9
-- Pillow >= 9.0, < 11
-- NumPy >= 1.21, < 2.0
+- `Pillow` >= 9.0, < 11
+- `NumPy` >= 1.21, < 2.0
 
 ## License
 

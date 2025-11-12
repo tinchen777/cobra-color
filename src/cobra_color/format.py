@@ -26,7 +26,7 @@ def fmt_dict(
     omits: Sequence[str] = [],
     title: str = "",
     display: bool = True
-):
+) -> str:
     r"""
     Format and display a dictionary or object's attributes in a structured manner.
 
@@ -116,7 +116,7 @@ def fmt_dict(
     return result
 
 
-def fmt_list(target: Sequence[Any], display: bool = True):
+def fmt_list(target: Sequence[Any], display: bool = True) -> str:
     r"""
     Format and display a list in a structured manner.
 
