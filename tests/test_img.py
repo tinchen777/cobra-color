@@ -1,10 +1,12 @@
 # tests/test_img.py
 from cobra_color.draw import fmt_image
+from pathlib import Path
 
 
 def test_fmt_image():
+    data_path = Path(__file__).parent / "assets" / "eagle.jpg"
     result = fmt_image(
-        "/data/tianzhen/my_projects/vanyarlearn/DRAFT/dec8c8639e61c08614e0e87a90f34221.jpg",
+        str(data_path),
         mode="half-color",
         height=30
     )
@@ -12,8 +14,9 @@ def test_fmt_image():
 
 
 def test_fmt_image_ascii():
+    data_path = Path(__file__).parent / "assets" / "eagle.jpg"
     result = fmt_image(
-        "/data/tianzhen/my_projects/vanyarlearn/DRAFT/dec8c8639e61c08614e0e87a90f34221.jpg",
+        str(data_path),
         mode="ascii",
         height=30
     )

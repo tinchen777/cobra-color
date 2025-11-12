@@ -4,6 +4,8 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/cobra-color.svg)](https://pypi.org/project/cobra-color/)
 ![Python](https://img.shields.io/pypi/pyversions/cobra-color.svg)
+[![Tests](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml/badge.svg)](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/tinchen777/cobra-color/branch/main/graph/badge.svg?token=<TOKEN>)](https://codecov.io/gh/tinchen777/cobra-color)
 ![License](https://img.shields.io/github/license/tinchen777/cobra-color.svg)
 
 [![Pull Requests Welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)](https://github.com/tinchen777/cobra-color/pulls)
