@@ -52,7 +52,7 @@ smart_print(fmt_font("Hello World!", font=FontName.LLDISCO,, mode="half-gray", t
 from . import draw
 
 from .color import ctext
-from .templete import compile_template
+from .template import compile_template
 from .output import (smart_print, set_console_func)
 from .format import (fmt_dict, fmt_list)
 
