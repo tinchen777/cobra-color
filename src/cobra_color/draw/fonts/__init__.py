@@ -3,7 +3,7 @@
 Module for font resources in cobra-color.
 """
 
-from .font_map import FontName
+from ._font_map import FontName
 
 __all__ = [
     "FontName"
