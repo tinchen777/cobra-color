@@ -4,7 +4,7 @@
 
 from typing import (Any, Mapping, Sequence)
 
-from .color import compile_template
+from .template import compile_template
 from .output import smart_print
 
 
