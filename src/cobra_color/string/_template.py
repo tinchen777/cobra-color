@@ -5,8 +5,8 @@
 from __future__ import annotations
 from typing import (Any, Optional, Iterable, Union)
 
-from .color import ColorStr
-from .types import (ColorName, StyleName)
+from ._color import ColorStr
+from ..types import (ColorName, StyleName)
 
 
 def compile_template(
@@ -21,15 +21,14 @@ def compile_template(
     ----------
         fg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
             The foreground color of the string.
-            (Same format and rules as in `ctext`.)
+            (Same format and rules as in :func:`ctext()`.)
 
         bg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
             The background color of the string.
-            (Same format and rules as in `ctext`.)
-
+            (Same format and rules as in :func:`ctext()`.)
         styles : Optional[Iterable[StyleName]]], default to `None`
             The styles combination of the string.
-            (Same format and rules as in `ctext`.)
+            (Same format and rules as in :func:`ctext()`.)
 
     Returns
     -------
@@ -42,20 +41,6 @@ def compile_template(
 class ColorTemplate():
     r"""
     A template class for generating colored strings with preset styles.
-
-    Parameters
-    ----------
-        fg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The foreground color of the string.
-            (Same format and rules as in `ctext`.)
-
-        bg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The background color of the string.
-            (Same format and rules as in `ctext`.)
-
-        styles : Optional[Iterable[StyleName]]], default to `None`
-            The styles combination of the string.
-            (Same format and rules as in `ctext`.)
     """
     def __init__(
         self,
@@ -88,9 +73,14 @@ class ColorTemplate():
         Returns
         -------
             ColorStr
-                The colored string with ANSI escape codes. Usage same as `str`, with `plain`, `color_only`, `style_only` properties.
+                The colored string with ANSI escape codes. Usage same as :class:`str`, with `plain`, `color_only`, `style_only` properties.
         """
-        return self.__empty.apply_to(text, use_color=use_color, use_style=use_style)
+        return self.__empty.apply(
+            text,
+            use_color=use_color,
+            use_style=use_style,
+            extend="all"
+        )
 
     def __call__(
         self,

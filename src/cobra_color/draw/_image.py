@@ -5,7 +5,7 @@
 from PIL import Image
 from typing import Optional
 
-from .utils import render_image
+from ._utils import render_image
 from ..types import ImgFillingModeName
 
 
@@ -27,25 +27,24 @@ def fmt_image(
 
         width : Optional[int], default to `None`
             Width of the rendered image.
-            - `None`: Use original width, unless `height` is specified to maintain aspect ratio.
+            - `None`: Use original width, unless :param:`height` is specified to maintain aspect ratio.
 
         height : Optional[int], default to `None`
             Height of the rendered image.
-            - `None`: Use original height, unless `width` is specified to maintain aspect ratio.
-
+            - `None`: Use original height, unless :param:`width` is specified to maintain aspect ratio.
         mode : ImgFillingModeName, default to `"half-color"`
-            The rendering mode. ~see `render_image` for details.
+            The rendering mode. See :func:`render_image()` for details.
 
         charset : str, default to `"@%#*+=-:. "`
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using `smart_print`.
+            Whether to print the rendered string to the terminal using :func:`smart_print()`.
 
     Returns
     -------
         str
-            String representation of the rendered image, use print() to display.
+            String representation of the rendered image.
     """
     img = Image.open(img_path)
 

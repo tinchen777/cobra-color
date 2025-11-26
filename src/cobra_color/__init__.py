@@ -1,71 +1,71 @@
 # src/cobra_color/__init__.py
 """
 cobra-color
-----
+===========
 
 A lightweight Python package for terminal display enhancements.
 
-_Example:_
+Modules
+-------
+- :mod:`cobra_color.draw`： Drawing utilities for rendering text and images in the terminal.
+- :mod:`cobra_color.string`： Colored string manipulation and generation.
+- :mod:`cobra_color.format`： Formatting utilities for structured data display.
+Functions
+---------
+- :func:`ctext()`： Generate a colored string for terminal output.
+- :func:`compile_template()`： Create a template for generating colored strings with preset styles.
+- :func:`smart_print()`： A smart print function that works well with progress bars from `tqdm` and `rich` consoles.
+- :func:`set_console_func()`： Set a global console for smart_print function.
 
-- Render a text in the terminal:
+Examples
+--------
 
-```python
-from cobra_color import ctext, smart_print
+Render a text in the terminal::
 
-c_text_1 = ctext("Hello World!", fg="r", styles=["bold"])
-# Print directly from the terminal
-print(c_text_1)
+    from cobra_color import ctext, smart_print
 
-c_text_2 = ctext("Hello World!", fg=(255, 255, 255), styles=["udl", "bold"])
-# Alternatively, you can use smart_print() to automatically support progress bar modes like tqdm and rich.
-smart_print(c_text_2)
+    c_text_1 = ctext("Hello World!", fg="r", styles=["bold"])
+    # Print directly from the terminal
+    print(c_text_1)
 
-# Merge `c_text_1` and `c_text_2` while preserving their colors and style formatting.
-c_text_3 = c_text_1 + c_text_2
+    c_text_2 = ctext("Hello World!", fg=(255, 255, 255), styles=["udl", "bold"])
+    # Alternatively, you can use `smart_print()` to automatically support progress bar modes like tqdm and rich.
+    smart_print(c_text_2)
 
-# You can continue to use str's proprietary functions and keep the existing colors and styles.
-c_text_1.upper()
-```
+    # Merge `c_text_1` and `c_text_2` while preserving their colors and style formatting.
+    c_text_3 = c_text_1 + c_text_2
 
-- Render an image in the terminal:
+    # You can continue to use str's proprietary functions and keep the existing colors and styles.
+    c_text_1.upper()
 
-```python
-from cobra_color.draw import fmt_image, smart_print
+Render an image in the terminal::
 
-# ASCII art
-smart_print(fmt_image("example.jpg", width=80, mode="ascii"))
+    from cobra_color.draw import fmt_image, smart_print
 
-# Half-block color (recommended for truecolor terminals)
-smart_print(fmt_image("example.jpg", width=80, mode="half-color"))
-```
+    # ASCII art
+    smart_print(fmt_image("example.jpg", width=80, mode="ascii"))
 
-- Render some text with fonts in the terminal:
+    # Half-block color (recommended for truecolor terminals)
+    smart_print(fmt_image("example.jpg", width=80, mode="half-color"))
 
-```python
-from cobra_color.draw import fmt_font, FontName, smart_print
+Render some text with fonts in the terminal::
 
-# Borderless grayscale font
-smart_print(fmt_font("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
-```
+    from cobra_color.draw import fmt_font, FontName, smart_print
+
+    # Borderless grayscale font
+    smart_print(fmt_font("Hello World!", font=FontName.LLDISCO, mode="half-gray", trim_border=True))
 """
 
-from . import draw
-
-from .color import ctext
-from .template import compile_template
+from .string import (ctext, compile_template)
 from .output import (smart_print, set_console_func)
-from .format import (fmt_dict, fmt_list)
 
 
 __author__ = "Zhen Tian"
 __version__ = "0.2.10"
 
 __all__ = [
-    "draw",  # module
     "ctext",
     "compile_template",
     "smart_print",
-    "set_console_func",
-    "fmt_dict",
-    "fmt_list"
+    "set_console_func"
 ]

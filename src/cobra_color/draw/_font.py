@@ -10,7 +10,7 @@ from typing import (Tuple, Optional, Any, Union)
 
 from . import fonts
 from .fonts import FontName
-from .utils import (render_image, to_bin_image, trim_image_border)
+from ._utils import (render_image, to_bin_image, trim_image_border)
 from ..types import ImgFillingModeName
 
 
@@ -42,7 +42,7 @@ def fmt_font(
             - `str`: Path to a TTF/OTF font file.
 
         mode : ImgFillingModeName, default to `"half-color"`
-            The rendering mode. ~see `render_image` for details.
+            The rendering mode. See :func:`render_image()` for details.
 
         trim_border : bool, default to `False`
             Whether to trim the border of the rendered image.
@@ -70,12 +70,12 @@ def fmt_font(
             Left top position to start drawing text on the image canvas.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using `smart_print`.
+            Whether to print the rendered string to the terminal using :func:`smart_print()`.
 
     Returns
     -------
         str
-            String representation of the rendered colored text, use print() to display.
+            String representation of the rendered colored text.
     """
     def _check(size: Any, default: Tuple[int, int]) -> Tuple[int, int]:
         if (isinstance(size, tuple)

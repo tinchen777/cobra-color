@@ -7,7 +7,7 @@ from PIL import (Image, ImageChops)
 import numpy as np
 from typing import (Tuple, List, Union, Iterable)
 
-from ..color import ctext
+from ..string import ctext
 from ..output import smart_print
 from ..types import ImgFillingModeName
 
@@ -22,7 +22,7 @@ def render_image(
     display: bool = False
 ) -> str:
     r"""
-    Render an image (`PIL.Image.Image`) into a string representation based on the specified mode.
+    Render an image (:class:`PIL.Image.Image`) into a string representation based on the specified mode.
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ def render_image(
 
         mode : ImgFillingModeName, default to `"half-color"`
             The rendering mode, which can be one of the following:
-            - `"ascii"`: Render using ASCII characters, mapping pixel brightness to characters in `charset`.
+            - `"ascii"`: Render using ASCII characters, mapping pixel brightness to characters in :param:`charset`.
             - `"color"`: Render using full block characters with color.
             - `"half-color"`: Render using half block characters with color, combining two pixels vertically.
             - `"gray"`: Render using full block characters in grayscale.
@@ -41,7 +41,7 @@ def render_image(
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using `smart_print`.
+            Whether to print the rendered string to the terminal using :func:`smart_print()`.
 
     Returns
     -------

@@ -71,7 +71,7 @@ def smart_print(
     console_func: Optional[Union[Callable[..., Any], ConsoleFunc]] = None
 ):
     r"""
-    A smart print function that works well with progress bars from `tqdm` and `rich` consoles.
+    A smart print function that works well with progress bars from :pkg:`tqdm` and :pkg:`rich` consoles.
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ def smart_print(
         console_func : Optional[Union[Callable[..., Any], ConsoleFunc]], default to `None`
             A console output function or method to use for printing.
             - `None`: Use the global console if set;
-            - `Callable[..., Any]` or `ConsoleFunc`: Use the provided function.
+            - `Callable[..., Any]` or :class:`ConsoleFunc`: Use the provided function.
     """
     # determine output function and kwargs
     if console_func is not None:

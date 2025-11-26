@@ -4,7 +4,7 @@
 
 from typing import (Any, Mapping, Sequence)
 
-from .template import compile_template
+from .string import compile_template
 from .output import smart_print
 
 
@@ -42,7 +42,7 @@ def fmt_dict(
             An optional title to be displayed at the top of the formatted output.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using `smart_print`.
+            Whether to print the formatted output to the terminal using :func:`smart_print()`.
 
     Returns
     -------
@@ -89,7 +89,7 @@ def fmt_dict(
                         key_temp = _STYLES["key_class_private"]
                     elif any(key.startswith(f"_{father}__") for father in father_classes):
                         # _FatherClass__param
-                        param_name = key.split("__")[-1]
+                        _, _, param_name = key.partition("__")
                         key_temp = _STYLES["key_inherited_private"]
                     else:
                         # _param
@@ -126,7 +126,7 @@ def fmt_list(target: Sequence[Any], display: bool = True) -> str:
             The target list to be formatted.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using `smart_print`.
+            Whether to print the formatted output to the terminal using :func:`smart_print()`.
 
     Returns
     -------
