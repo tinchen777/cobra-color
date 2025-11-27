@@ -4,13 +4,13 @@ String utilities for cobra-color.
 
 Functions
 ---------
-- :func:`ctext()`： Generate a colored string for terminal output.
-- :func:`compile_template()`： Create a template for generating colored strings with preset styles.
+- :func:`ctext()`： Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`compile_template()`： Create a template for generating :class:`ColorStr` instances with preset styles.
 
 Classes
 -------
-- :class:`ColorStr`： A string class that supports ANSI color and style formatting while preserving plain text.
-- :class:`ColorTemplate`： A template class for generating colored strings with preset styles.
+- :class:`ColorStr`： An easy-to-use `rich str` class with perfect support for :class:`str`.
+- :class:`ColorTemplate`： A template class for generating :class:`ColorStr` instances with preset styles.
 """
 
 from ._color import (ctext, ColorStr)

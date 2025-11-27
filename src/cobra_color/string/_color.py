@@ -13,20 +13,21 @@ from ..types import (ColorName, StyleName)
 
 def ctext(
     text: Any,
+    /,
     fg: Optional[Union[ColorName, int, Iterable[int]]] = None,
     bg: Optional[Union[ColorName, int, Iterable[int]]] = None,
     styles: Optional[Iterable[StyleName]] = None
 ) -> ColorStr:
     r"""
-    Generate a colored string for terminal output.
+    Generate a easy-to-use `rich str` instance with perfect support for :class:`str`, containing `rich str` versions of almost all native :class:`str` features.
 
     Parameters
     ----------
         text : Any
-            The text content to be colored.
+            The text content.
 
         fg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The foreground color of the string.
+            The foreground color of the `rich str`.
             - _ColorName_: `Basic 8 color` OR `Light 8 color`, compatible with older terminals;
 
             NOTE: _ColorName_: `"d"`(black); `"r"`(red); `"g"`(green); `"y"`(yellow); `"b"`(blue); `"m"`(magenta); `"c"`(cyan); `"w"`(white). Prefix `l` means Light 8 color.
@@ -35,36 +36,102 @@ def ctext(
 
             NOTE: `0-7`: Basic 8 color; `8-15`: Light 8 color; `16-231`: 6x6x6 color cube; `232-255`: grayscale from dark to light.
 
-            - _Iterable[int]_: `True color`, compatible with modern terminals.
+            - _Iterable_: `True color`, compatible with modern terminals.
 
             NOTE: Each value should be in range `0-255`, representing `R`, `G`, `B` respectively.
 
             - `None`: No color applied.
 
         bg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The background color of the string.
+            The background color of the `rich str`.
             (Same format and rules as parameter :param:`fg`.)
 
         styles : Optional[Iterable[StyleName]]], default to `None`
-            The styles combination of the string.
+            The styles combination of the `rich str`.
 
             NOTE: _StyleName_: `"bold"`, `"dim"`, `"italic"`, `"udl"`, `"underline"`, `"blink"`, `"selected"`, `"disappear"`, `"del"`, `"delete"`.
 
     Returns
     -------
         ColorStr
-            The colored string with ANSI escape codes. Usage same as :class:`str`, with `plain`, `color_only`, `style_only` properties. You can combine multiple colored strings using `+` operator or `+=` operator.
+            A :class:`ColorStr` instance with the specified color and style.
     """
     return ColorStr.from_str(text, fg=fg, bg=bg, styles=styles)
 
 
+def _to_str(obj: Any, default: Optional[str] = None, /) -> str:
+    r"""
+    Convert an object to :class:`str`, with default value if empty.
+    """
+    str_ = obj.plain if isinstance(obj, ColorStr) else str(obj)
+    if default is None or (default is not None and len(str_) > 0):
+        return str_
+    else:
+        return default.plain if isinstance(default, ColorStr) else str(default)
+
+
+def _to_ColorStr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
+    r"""
+    Convert an object to :class:`ColorStr`, with default value if empty.
+    """
+    c_str = obj if isinstance(obj, ColorStr) else ColorStr.from_str(obj)
+    if default is None or (default is not None and len(c_str) > 0):
+        return c_str
+    else:
+        return default if isinstance(default, ColorStr) else ColorStr.from_str(default)
+
+
+def _fixed_method(func):
+    def wrapper(obj: ColorStr):
+        try:
+            return obj.apply(getattr(obj.plain, func.__name__)())
+        except Exception as e:
+            raise e.__class__(f"Error When Calling ColorStr.{func.__name__}(): {e}")
+
+    return wrapper
+
+
+def _extend_method(func):
+    def wrapper(obj: ColorStr, width, fillchar=" ", /, extend=None):
+        try:
+            # width
+            if not isinstance(width, int):
+                raise TypeError(f"Argument 'width' Must Be An Integer, Got {type(width)}.")
+            if width <= len(obj):
+                return obj.copy()
+            # fillchar
+            fillchar = _to_ColorStr(fillchar, " ")
+            fillchar_len = len(fillchar)
+
+            left_len, right_len = func(obj, width)
+            # left part
+            left = fillchar * ((left_len // fillchar_len) + 1)
+            # right part
+            right = fillchar * ((right_len // fillchar_len) + 1)
+
+            return obj.apply(left[:left_len] + obj + right[:right_len], start_idx=left_len, extend=extend)
+
+        except Exception as e:
+            raise e.__class__(f"Error When Calling ColorStr.{func.__name__}({width!r}, {fillchar!r}, extend={extend!r}): {e}")
+
+    return wrapper
+
+
+def _clip_method(func):
+    def wrapper(obj: ColorStr, *args):
+        try:
+            str_result = getattr(obj.plain, func.__name__)(*args)
+            return obj.apply(str_result, start_idx=-obj.find(str_result))
+        except Exception as e:
+            args = ", ".join([repr(arg) for arg in args])
+            raise e.__class__(f"Error When Calling ColorStr.{func.__name__}({args}): {e}")
+
+    return wrapper
+
+
 class ColorStr(str):
     r"""
-    A string class that supports ANSI color and style formatting while preserving plain text.
-
-    NOTE 1: Usage same as :class:`str`, with `plain`, `color_only`, `style_only` properties.
-
-    NOTE 2: The :class:`str` output functions from str class (like :func:`upper()`, :func:`lower()`, etc.) are overridden to preserve color and style formatting for non-combined ColorStr.
+    An easy-to-use `rich str` class with perfect support for :class:`str`, containing `rich str` versions of almost all native :class:`str` features.
     """
     _SEGMENTS: List[Tuple[str, str, str]]  # list of (plain, color_codes, style_codes)
     _CUMSUM: List[int]
@@ -73,17 +140,18 @@ class ColorStr(str):
     @classmethod
     def from_str(
         cls,
-        _str: Any,
+        str_: Any,
+        /,
         fg: Optional[Union[ColorName, int, Iterable[int]]] = None,
         bg: Optional[Union[ColorName, int, Iterable[int]]] = None,
         styles: Optional[Iterable[StyleName]] = None
     ):
         r"""
-        Create a ColorStr from a regular string with specified color and style.
+        Create a :class:`ColorStr` instance from a regular string with specified color and style.
 
         Parameter Reference: :func:`ctext()`
         """
-        plain = str(_str)
+        plain = str(str_)
         obj = super().__new__(cls, plain)
         # segments
         if plain and (fg is not None or bg is not None or styles is not None):
@@ -127,17 +195,16 @@ class ColorStr(str):
                 continue
             if seg[1] != "" or seg[2] != "":
                 is_colored = True
-            str_ = seg[0]
-            plain = str_.plain if isinstance(str_, ColorStr) else str(str_)
-            if plain:
+            str_ = _to_str(seg[0])
+            if str_:
                 if last_seg is None or last_seg[1] != seg[1] or last_seg[2] != seg[2]:
                     # append last segment
                     _append_last()
                     # update
-                    last_seg = [plain, seg[1], seg[2]]
+                    last_seg = [str_, seg[1], seg[2]]
                 else:
                     # merge with last segment
-                    last_seg[0] += plain
+                    last_seg[0] += str_
             else:
                 if first_empty is None:
                     first_empty = seg
@@ -158,6 +225,32 @@ class ColorStr(str):
         obj._is_colored = is_colored
 
         return obj
+
+    def to(
+        self,
+        use_color: bool = True,
+        use_style: bool = True
+    ) -> ColorStr:
+        r"""
+        Create a new :class:`ColorStr` instance with specified color and style usage from the current :class:`ColorStr`.
+
+        Parameters
+        ----------
+            use_color : bool, default to `True`
+                Whether to keep the color codes.
+
+            use_style : bool, default to `True`
+                Whether to keep the style codes.
+
+        Returns
+        -------
+            ColorStr
+                A new :class:`ColorStr` instance with specified color and style usage.
+        """
+        return ColorStr(*[
+            (seg[0], seg[1] if use_color else "", seg[2] if use_style else "")
+            for seg in self._SEGMENTS
+        ])
 
     def iscombined(self) -> bool:
         r"""
@@ -182,7 +275,7 @@ class ColorStr(str):
         """
         return [ColorStr(seg) for seg in self._SEGMENTS]
 
-    def del_pieces(self, indices: Iterable[int] = (-1,)) -> ColorStr:
+    def del_pieces(self, indices: Iterable[int] = (-1,), /) -> ColorStr:
         r"""
         Delete specific segments by their indices.
 
@@ -203,8 +296,7 @@ class ColorStr(str):
     def apply(
         self,
         text: Any,
-        use_color: bool = True,
-        use_style: bool = True,
+        /,
         _from_left: bool = True,
         start_idx: int = 0,
         extend: Optional[Literal["left", "right", "all"]] = None,
@@ -217,12 +309,6 @@ class ColorStr(str):
         ----------
             text : Any
                 The text content to which the color and style pattern will be applied.
-
-            use_color : bool, default to `True`
-                Whether to apply the color codes from the pattern.
-
-            use_style : bool, default to `True`
-                Whether to apply the style codes from the pattern.
 
             start_idx : int, default to `0`
                 The starting index from `left` in the text where the pattern will be applied.
@@ -247,7 +333,7 @@ class ColorStr(str):
             IndexError
                 If :param:`segment_idx` is out of range.
         """
-        c_text = text if isinstance(text, ColorStr) else ColorStr.from_str(text)
+        c_text = _to_ColorStr(text)
         # text length
         text_len = len(c_text)
         # pattern
@@ -265,6 +351,10 @@ class ColorStr(str):
         if text_len == 0 or pattern_len == 0:
             return c_text
 
+        # check start_idx
+        if not isinstance(start_idx, int):
+            raise TypeError(f"[ColorStr.apply()] Argument 'start_idx' Must Be An Integer, Got {type(start_idx)}.")
+
         segments: List[Tuple[str, str, str]] = []
         # determine cut points
         if _from_left:
@@ -279,10 +369,7 @@ class ColorStr(str):
             if extend in ("left", "all"):
                 seg = pattern._SEGMENTS[0]
                 segments.append((
-                    c_text.plain[0: index],
-                    seg[1] if use_color else "",
-                    seg[2] if use_style else ""
-                ))
+                    c_text.plain[0: index], seg[1], seg[2]))
             else:
                 segments.extend(c_text[0: index]._SEGMENTS)
         # middle piece
@@ -293,10 +380,7 @@ class ColorStr(str):
             for seg_idx, cum_idx in enumerate(actual_pattern._CUMSUM):
                 seg = actual_pattern._SEGMENTS[seg_idx]
                 segments.append((
-                    mid_text[start_idx: cum_idx],
-                    seg[1] if use_color else "",
-                    seg[2] if use_style else ""
-                ))
+                    mid_text[start_idx: cum_idx], seg[1], seg[2]))
                 # update
                 start_idx = cum_idx
         # right piece
@@ -305,10 +389,7 @@ class ColorStr(str):
             if extend in ("right", "all"):
                 seg = pattern._SEGMENTS[-1]
                 segments.append((
-                    c_text.plain[index:],
-                    seg[1] if use_color else "",
-                    seg[2] if use_style else ""
-                ))
+                    c_text.plain[index:], seg[1], seg[2]))
             else:
                 segments.extend(c_text[index:]._SEGMENTS)
 
@@ -317,8 +398,7 @@ class ColorStr(str):
     def rapply(
         self,
         text: Any,
-        use_color: bool = True,
-        use_style: bool = True,
+        /,
         start_idx: int = 0,
         extend: Optional[Literal["left", "right", "all"]] = None,
         segment_idx: Optional[int] = None
@@ -329,16 +409,14 @@ class ColorStr(str):
         Parameter Reference: :func:`apply()`
         """
         return self.apply(
-            text=text,
-            use_color=use_color,
-            use_style=use_style,
+            text,
             start_idx=start_idx,
             extend=extend,
             segment_idx=segment_idx,
             _from_left=False
         )
 
-    def join(self, iterable: Iterable[Any]) -> ColorStr:
+    def join(self, iterable: Iterable[Any], /) -> ColorStr:
         r"""
         Join an iterable of strings using this :class:`ColorStr` as the separator.
 
@@ -350,7 +428,7 @@ class ColorStr(str):
         Returns
         -------
             ColorStr
-                The joined colored string with ANSI escape codes. Usage same as :class:`str`, with `plain`, `color_only`, `style_only` properties.
+                The joined :class:`ColorStr`.
         """
         segments = []
         first = True
@@ -364,39 +442,183 @@ class ColorStr(str):
                 segments.append((str(item), "", ""))
         return ColorStr(*segments)
 
-    
-    
-    def __getattribute__(self, name):
-        attr = super().__getattribute__(name)
+    def split(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
+        sep = _to_str(sep, " ")
 
-        if callable(attr):
-            def wrapper(*args, **kwargs):
-                result = attr(*args, **kwargs)
-                
-                
-                
-                
-                
-                if isinstance(result, str) and not isinstance(result, ColorStr) and not self.iscombined():
-                    return self.apply(result)
-                return result
-            return wrapper
-        return attr
+        result: List[ColorStr] = []
+        count = 0
+        start_idx = 0
+        end_idx = -1
+        while maxsplit == -1 or count < maxsplit:
+            end_idx = self.find(sep, start_idx)
+            if end_idx == -1:
+                break
+            # segment
+            result.append(self[start_idx: end_idx])
+            # update
+            start_idx = end_idx + len(sep)
+            count += 1
+        # last segment
+        result.append(self[start_idx:])
 
-    def __add__(self, other_str: str):
+        return result
+
+    def rsplit(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
+        sep = _to_str(sep, " ")
+
+        result: List[ColorStr] = []
+        count = 0
+        end_idx = len(self)
+        start_idx = -1
+        while maxsplit == -1 or count < maxsplit:
+            start_idx = self.rfind(sep, 0, end_idx)
+            if start_idx == -1:
+                break
+            # segment
+            result.append(self[start_idx + len(sep): end_idx])
+            # update
+            end_idx = start_idx
+            count += 1
+        # last segment
+        result.append(self[0: end_idx])
+        result.reverse()
+
+        return result
+
+    def splitlines(self, keepends: bool = False) -> List[ColorStr]:  # type: ignore[misc]
+        result = self.split("\n")
+        if keepends:
+            for i in range(len(result) - 1):
+                result[i] += "\n"
+        return result
+
+    def partition(self, sep: Any) -> Tuple[ColorStr, ColorStr, ColorStr]:  # type: ignore
+        sep = _to_str(sep)
+
+        idx = self.find(sep)
+        if idx == -1:
+            return (self.copy(), ColorStr.from_str(""), ColorStr.from_str(""))
+        else:
+            return (
+                self[0: idx],
+                self[idx: idx + len(sep)],
+                self[idx + len(sep):]
+            )
+
+    def rpartition(self, sep: Any) -> Tuple[ColorStr, ColorStr, ColorStr]:  # type: ignore
+        sep = _to_str(sep)
+
+        idx = self.rfind(sep)
+        if idx == -1:
+            return (ColorStr.from_str(""), ColorStr.from_str(""), self.copy())
+        else:
+            return (
+                self[0: idx],
+                self[idx: idx + len(sep)],
+                self[idx + len(sep):]
+            )
+
+    def replace(self, old: str, new: str, /, count: Any = -1) -> ColorStr:
+        old = _to_str(old)  # old must be str
+        new = _to_ColorStr(new)
+
+        return new.join(self.split(old, maxsplit=count))
+
+    @_fixed_method
+    def capitalize(self) -> ColorStr: ...
+
+    @_fixed_method
+    def casefold(self) -> ColorStr: ...
+
+    @_fixed_method
+    def lower(self) -> ColorStr: ...
+
+    @_fixed_method
+    def swapcase(self) -> ColorStr: ...
+
+    @_fixed_method
+    def title(self) -> ColorStr: ...
+
+    @_fixed_method
+    def upper(self) -> ColorStr: ...
+
+    @_extend_method
+    def center(
+        self,
+        width: Any,
+        fillchar: str = " ",
+        /,
+        extend: Optional[Literal["left", "right", "all"]] = None
+    ) -> ColorStr:
+        padding = width - len(self)
+        left = padding // 2 + (padding % 2)
+        right = padding // 2
+
+        return left, right  # type: ignore
+
+    @_extend_method
+    def ljust(
+        self,
+        width: Any,
+        fillchar: str = " ",
+        /,
+        extend: Optional[Literal["right"]] = None
+    ) -> ColorStr:
+        return 0, width - len(self)  # type: ignore
+
+    @_extend_method
+    def rjust(
+        self,
+        width: Any,
+        fillchar: str = " ",
+        /,
+        extend: Optional[Literal["left"]] = None
+    ) -> ColorStr:
+        return width - len(self), 0  # type: ignore
+
+    def zfill(
+        self,
+        width: Any,
+        /,
+        extend: Optional[Literal["left"]] = None
+    ) -> ColorStr:
+        return self.rjust(width, "0", extend=extend)
+
+    @_clip_method
+    def strip(self, chars: str | None = None, /) -> ColorStr: ...
+
+    @_clip_method
+    def lstrip(self, chars: str | None = None, /) -> ColorStr: ...
+
+    @_clip_method
+    def rstrip(self, chars: str | None = None, /) -> ColorStr: ...
+
+    @_clip_method
+    def removeprefix(self, prefix: str, /) -> ColorStr: ...
+
+    @_clip_method
+    def removesuffix(self, suffix: str, /) -> ColorStr: ...
+
+    def copy(self):
+        r"""
+        Create a copy of the :class:`ColorStr`.
+        """
+        return ColorStr(*self._SEGMENTS)
+
+    def __add__(self, other_str: str, /):
         if isinstance(other_str, ColorStr):
             other_segments = other_str._SEGMENTS
         else:
             other_segments = [(str(other_str), "", "")]
         return ColorStr(*(self._SEGMENTS + other_segments))
 
-    def __mul__(self, n: Any):
+    def __mul__(self, n: Any, /):
         assert isinstance(n, int), "Can Only Multiply ColorStr By An Integer."
         if n <= 0:
             return ColorStr.from_str("")
         return ColorStr(*self._SEGMENTS * n)
 
-    def __getitem__(self, key: Any):
+    def __getitem__(self, key: Any, /):
         if isinstance(key, slice):
             start, stop, step = key.indices(len(self))
             if step != 1:
@@ -407,7 +629,7 @@ class ColorStr(str):
             for seg_idx, cum_idx in enumerate(self._CUMSUM):
                 left_idx = max(start_idx, start)
                 right_idx = min(stop, cum_idx)
-                if left_idx < right_idx:
+                if left_idx <= right_idx:
                     new_segments.append((
                         self.plain[left_idx: right_idx],
                         self._SEGMENTS[seg_idx][1],

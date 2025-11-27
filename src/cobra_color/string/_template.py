@@ -15,32 +15,32 @@ def compile_template(
     styles: Optional[Iterable[StyleName]] = None
 ):
     r"""
-    Create a template for generating colored strings with preset styles.
+    Create a template for generating `rich str` instances.
 
     Parameters
     ----------
         fg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The foreground color of the string.
+            The foreground color of the `rich str`.
             (Same format and rules as in :func:`ctext()`.)
 
         bg : Optional[Union[ColorName, int, Iterable[int]]], default to `None`
-            The background color of the string.
+            The background color of the `rich str`.
             (Same format and rules as in :func:`ctext()`.)
         styles : Optional[Iterable[StyleName]]], default to `None`
-            The styles combination of the string.
+            The styles combination of the `rich str`.
             (Same format and rules as in :func:`ctext()`.)
 
     Returns
     -------
         Template
-            A template object that can be used to generate colored strings with the preset styles.
+            A template instance that can be used to generate :class:`ColorStr` instances.
     """
     return ColorTemplate(fg=fg, bg=bg, styles=styles)
 
 
 class ColorTemplate():
     r"""
-    A template class for generating colored strings with preset styles.
+    A template class for generating `rich str` instances.
     """
     def __init__(
         self,
@@ -48,14 +48,37 @@ class ColorTemplate():
         bg: Any = None,
         styles: Any = None,
     ):
-        self.__empty = ColorStr.from_str("", fg=fg, bg=bg, styles=styles)
+        self.__empty = ColorStr.from_str("A", fg=fg, bg=bg, styles=styles)
 
-    def format(
+    def to(
         self,
-        text: Any,
         use_color: bool = True,
         use_style: bool = True
-    ) -> ColorStr:
+    ) -> ColorTemplate:
+        r"""
+        Convert the :class:`ColorTemplate` to specified color and style usage.
+
+        Parameters
+        ----------
+            use_color : bool, default to `True`
+                Whether to keep the color codes.
+
+            use_style : bool, default to `True`
+                Whether to keep the style codes.
+
+        Returns
+        -------
+            ColorTemplate
+                The :class:`ColorTemplate` instance with specified color and style usage.
+        """
+        self.__empty = self.__empty.to(
+            use_color=use_color,
+            use_style=use_style
+        )
+
+        return self
+
+    def format(self, text: Any, /) -> ColorStr:
         r"""
         Generate a colored string using the preset template.
 
@@ -64,31 +87,15 @@ class ColorTemplate():
             text : Any
                 The text content to be colored.
 
-            use_color : bool, default to `True`
-                Whether to apply color codes.
-
-            use_style : bool, default to `True`
-                Whether to apply style codes.
-
         Returns
         -------
             ColorStr
-                The colored string with ANSI escape codes. Usage same as :class:`str`, with `plain`, `color_only`, `style_only` properties.
+                A :class:`ColorStr` instance.
         """
-        return self.__empty.apply(
-            text,
-            use_color=use_color,
-            use_style=use_style,
-            extend="all"
-        )
+        return self.__empty.apply(text, extend="all")
 
-    def __call__(
-        self,
-        text: Any,
-        use_color: bool = True,
-        use_style: bool = True
-    ) -> ColorStr:
+    def __call__(self, text: Any, /) -> ColorStr:
         r"""
-        Generate a colored string using the preset template.
+        Generate a :class:`ColorStr` instance using the preset template.
         """
-        return self.format(text, use_color=use_color, use_style=use_style)
+        return self.format(text)

@@ -1,5 +1,5 @@
 # tests/test_format.py
-from cobra_color import fmt_dict, fmt_list
+from cobra_color.format import fmt_dict, fmt_list
 
 
 def test_fmt_dict():

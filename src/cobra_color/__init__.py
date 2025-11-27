@@ -12,8 +12,8 @@ Modules
 - :mod:`cobra_color.format`： Formatting utilities for structured data display.
 Functions
 ---------
-- :func:`ctext()`： Generate a colored string for terminal output.
-- :func:`compile_template()`： Create a template for generating colored strings with preset styles.
+- :func:`ctext()`： Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`compile_template()`： Create a template for generating :class:`ColorStr` instances with preset styles.
 - :func:`smart_print()`： A smart print function that works well with progress bars from `tqdm` and `rich` consoles.
 - :func:`set_console_func()`： Set a global console for smart_print function.
 
