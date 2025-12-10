@@ -1,28 +1,36 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.9
 # @TianZhen
+"""
+Formatting utilities for for :pkg:`cobra_color` package.
 
-from typing import (Any, Mapping, Sequence)
+Functions
+---------
+- :func:`fmt_dict()`: Format and display a dictionary or object's attributes in a structured manner.
+- :func:`fmt_list()`: Format and display a list in a structured manner.
+"""
 
-from .string import compile_template
+from typing import (Any, Mapping, Sequence, List)
+
+from .string import ColorSeg
 from .output import smart_print
 
 
 _STYLES = {
-    "title": compile_template(fg="y", styles={"bold"}),
-    "key": compile_template(styles={"bold", "selected"}),  # Normal key
-    "key_param": compile_template(styles={"bold", "selected"}),  # param
-    "key_protected": compile_template(styles={"bold"}),  # _param
-    "key_class_private": compile_template(styles={"dim"}),  # _Class__param
-    "key_inherited_private": compile_template(styles={"dim", "del"}),  # _FatherClass__param
-
-    "type": compile_template(fg="c", styles={"italic"}),
-    "placeholder": compile_template(styles={"udl"})
+    "title": ColorSeg.from_raw("", fg="y", styles={"bold"}),
+    "key": ColorSeg.from_raw("", styles={"bold", "selected"}),  # Normal key
+    "key_param": ColorSeg.from_raw("", styles={"bold", "selected"}),  # param
+    "key_protected": ColorSeg.from_raw("", styles={"bold"}),  # _param
+    "key_class_private": ColorSeg.from_raw("", styles={"dim"}),  # _Class__param
+    "key_inherited_private": ColorSeg.from_raw("", styles={"dim", "del"}),  # _FatherClass__param
+    "type": ColorSeg.from_raw("", fg="c", styles={"italic"}),
+    "placeholder": ColorSeg.from_raw("", styles={"udl"})
 }
 
 
 def fmt_dict(
     target: Any,
+    /,
     omits: Sequence[str] = [],
     title: str = "",
     display: bool = True
@@ -56,29 +64,29 @@ def fmt_dict(
         class_name = str(target.__class__.__name__)
         father_classes = [father_class.__name__ for father_class in target.__class__.__bases__]
         legend = '  '.join([
-            _STYLES["key_param"]("[param]"),
-            _STYLES["key_protected"]("[_param]"),
-            _STYLES["key_class_private"](f"[_{class_name}__param]"),
-            _STYLES["key_inherited_private"](f"[_{father_classes[0]}__param]")
+            _STYLES["key_param"]("[param]").to_str(),
+            _STYLES["key_protected"]("[_param]").to_str(),
+            _STYLES["key_class_private"](f"[_{class_name}__param]").to_str(),
+            _STYLES["key_inherited_private"](f"[_{father_classes[0]}__param]").to_str()
         ])
         target = target.__dict__
     elif not isinstance(target, Mapping):
         target = {"Error": f"Input target should be a Mapping type, got {type(target)}."}
 
-    lines = []
+    lines: List[str] = []
     if target:
         # indent
         indent = len(str(len(target)))
         # title
         if title:
-            lines.append((" " * (indent + 2)) + _STYLES["title"](f"< {title} >"))
+            lines.append((" " * (indent + 2)) + _STYLES["title"](f"< {title} >").to_str())
         # legend
         if legend:
             lines.append((" " * (indent + 2)) + legend)
         # content
         for idex, (key, val) in enumerate(target.items(), start=1):
             key = str(key)
-            type_str = _STYLES["type"](type(val).__name__)
+            type_str = _STYLES["type"](type(val).__name__).to_str()
             if class_name:
                 # class attributes
                 if key.startswith("_"):
@@ -105,18 +113,17 @@ def fmt_dict(
                 key_temp = _STYLES["key"]
             # omit items
             if param_name in omits and val:
-                val = _STYLES["placeholder"]("PLACEHOLDER")
+                val = _STYLES["placeholder"]("PLACEHOLDER").to_str()
 
-            lines.append(f"#{str(idex).zfill(indent)} {key_temp(f'[{param_name}]')}{type_str}: {val}")
+            lines.append(f"#{str(idex).zfill(indent)} {key_temp(f'[{param_name}]').to_str()}{type_str}: {val}")
     result = "\n".join(lines)
-
     if display:
         smart_print(result)
 
     return result
 
 
-def fmt_list(target: Sequence[Any], display: bool = True) -> str:
+def fmt_list(target: Sequence[Any], /, display: bool = True) -> str:
     r"""
     Format and display a list in a structured manner.
 
@@ -139,7 +146,6 @@ def fmt_list(target: Sequence[Any], display: bool = True) -> str:
         for idex, item in enumerate(target, start=1):
             lines.append(f"#{str(idex).zfill(indent)} {item}")
     result = "\n".join(lines)
-
     if display:
         smart_print(result)
 

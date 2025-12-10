@@ -7,17 +7,18 @@ from PIL import (Image, ImageChops)
 import numpy as np
 from typing import (Tuple, List, Union, Iterable)
 
-from ..string import ctext
+from ..string import to_ansi
 from ..output import smart_print
-from ..types import ImgFillingModeName
+from ..types import T_ImgFillingMode
 
 
 VALID_MODES = ("ascii", "color", "half-color", "gray", "half-gray")
 
 
-def render_image(
+def image_to_ansi(
     img: Image.Image,
-    mode: ImgFillingModeName = "half-color",
+    /,
+    mode: T_ImgFillingMode = "half-color",
     charset: str = "@%#*+=-:. ",
     display: bool = False
 ) -> str:
@@ -30,12 +31,8 @@ def render_image(
             The PIL Image to be rendered.
 
         mode : ImgFillingModeName, default to `"half-color"`
-            The rendering mode, which can be one of the following:
-            - `"ascii"`: Render using ASCII characters, mapping pixel brightness to characters in :param:`charset`.
-            - `"color"`: Render using full block characters with color.
-            - `"half-color"`: Render using half block characters with color, combining two pixels vertically.
-            - `"gray"`: Render using full block characters in grayscale.
-            - `"half-gray"`: Render using half block characters in grayscale, combining two pixels vertically.
+            The rendering mode.
+            See :func:`imgfile_to_ansi()` for details.
 
         charset : str, default to `"@%#*+=-:. "`
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
@@ -50,42 +47,38 @@ def render_image(
     """
     if mode not in VALID_MODES:
         raise ValueError(f"Unknown mode(ImgFillingModeName): {mode!r}. Valid Modes: {VALID_MODES}")
-
-    is_color = "color" in mode
-    if not is_color:
+    if "color" not in mode:
         # Convert to grayscale
         img = img.convert("L")
     pixel_arr = np.array(img)
     height, width = pixel_arr.shape[:2]
 
     out_lines: List[str] = []
-    if mode.startswith("half-"):
+    if mode == "half-color" or mode == "half-gray":
         # Mode: `half-color` or `half-gray`
         for y in range(0, height, 2):
             upper_row = pixel_arr[y]
             lower_row = pixel_arr[y + 1] if (y + 1) < height else None
             line_str = ""
-            for x in range(width):
-                # fore
-                if is_color:
-                    # Mode: `half-color`
-                    fore = upper_row[x]
-                else:
-                    # Mode: `half-gray`
+            if mode == "half-color":
+                # Mode: `half-color`
+                for x in range(width):
+                    line_str += to_ansi(
+                        "\u2580",
+                        fg=tuple(upper_row[x]),
+                        bg=None if lower_row is None else tuple(lower_row[x])
+                    )
+            else:
+                # Mode: `half-gray`
+                for x in range(width):
                     upper = int(upper_row[x])
                     fore = (upper, upper, upper)
-                # back
-                if lower_row is not None:
-                    if is_color:
-                        # Mode: `half-color`
-                        back = lower_row[x]
-                    else:
-                        # Mode: `half-gray`
+                    if lower_row is not None:
                         lower = int(lower_row[x])
                         back = (lower, lower, lower)
-                else:
-                    back = None
-                line_str += ctext("\u2580", fg=fore, bg=back)
+                    else:
+                        back = None
+                    line_str += to_ansi("\u2580", fg=fore, bg=back)
             out_lines.append(line_str)
     elif mode == "ascii":
         # Mode: `ascii`
@@ -95,33 +88,34 @@ def render_image(
         if pixel_arr_max == pixel_arr_min:
             indices = np.zeros_like(pixel_arr, dtype=int)
         else:
-            indices = (pixel_arr - pixel_arr_min) * (len(charset) - 1) // (pixel_arr_max - pixel_arr_min)
+            ratio = (pixel_arr - pixel_arr_min) / (pixel_arr_max - pixel_arr_min)
+            indices = np.round(ratio * (len(charset) - 1)).astype(int)
         out_lines = ["".join(char_arr[indices[row]]) for row in range(height)]
-    else:
-        # Mode: `ascii`, `color`, `gray`
+    elif mode == "color":
+        # Mode: `color`
         for row in pixel_arr:
             line_str = ""
             for pixel_val in row:
-                if mode == "ascii":
-                    char_index = pixel_val * (len(charset) - 1) // 255
-                    line_str += charset[char_index]
-                else:
-                    line_str += ctext(
-                        " ",
-                        bg=pixel_val if is_color else (pixel_val, pixel_val, pixel_val)
-                    )
+                line_str += to_ansi(" ", bg=tuple(pixel_val))
+            out_lines.append(line_str)
+    elif mode == "gray":
+        # Mode: `gray`
+        for row in pixel_arr:
+            line_str = ""
+            for pixel_val in row:
+                line_str += to_ansi(" ", bg=(pixel_val, pixel_val, pixel_val))
             out_lines.append(line_str)
 
     output_str = "\n".join(out_lines)
-
     if display:
         smart_print(output_str)
 
     return output_str
 
 
-def to_bin_image(
+def binarize_image(
     src: Union[Iterable, Image.Image],
+    /,
     threshold: int = 128,
     upper_rgb: Tuple[int, int, int] = (255, 255, 255),
     lower_rgb: Tuple[int, int, int] = (0, 0, 0)
@@ -165,19 +159,17 @@ def to_bin_image(
                 raise ValueError(f"Input 3-D Array's Last Dimension Must Be 1 (Grayscale) Or 3 (RGB), Not {arr_shape[-1]}.")
         if len(arr_shape) != 2:
             raise ValueError(f"Input Array Must Be 2-D (Grayscale Image) Or 3-D (RGB Image), Not {arr_shape}.")
-
     arr = arr.astype(np.uint8)
-
-    mask = arr > threshold
-    upper = np.array(upper_rgb, dtype=np.uint8)
-    lower = np.array(lower_rgb, dtype=np.uint8)
-
-    rgb_arr = np.where(mask[..., None], upper, lower)
+    rgb_arr = np.where(
+        (arr > threshold)[..., None],  # mask expanded to 3-D
+        np.array(upper_rgb, dtype=np.uint8),  # upper_rgb
+        np.array(lower_rgb, dtype=np.uint8)  # lower_rgb
+    )
 
     return Image.fromarray(rgb_arr, mode="RGB")
 
 
-def trim_image_border(img: Image.Image, value: int = 0):
+def trim_image_border(img: Image.Image, /, value: int = 0):
     r"""
     Trim the border of the image that matches the specified value.
 

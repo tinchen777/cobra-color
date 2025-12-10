@@ -1,23 +1,65 @@
 # tests/test_img.py
-from cobra_color.draw import fmt_image
+
+# import sys
+# sys.path.append("/data/tianzhen/my_packages/cobra-color/src")
+
+from cobra_color.render import imgfile_to_ansi
 from pathlib import Path
+import time
 
 
-def test_fmt_image():
+def test_fmt_image(mode):
     data_path = Path(__file__).parent / "assets" / "eagle.jpg"
-    result = fmt_image(
+    result = imgfile_to_ansi(
         str(data_path),
-        mode="half-color",
-        height=30
+        mode=mode,
+        height=20,
+        display=True
     )
     assert isinstance(result, str)
+    # smart_print(result)
+    # Console().print(result, end="", markup=False, highlight=False)
 
 
 def test_fmt_image_ascii():
     data_path = Path(__file__).parent / "assets" / "eagle.jpg"
-    result = fmt_image(
+    result = imgfile_to_ansi(
         str(data_path),
         mode="ascii",
-        height=30
+        charset="@%#*+=-:. ",
+        height=30,
+        display=True
     )
     assert isinstance(result, str)
+    # print(result)
+
+
+if __name__ == "__main__":
+    s = time.time()
+    test_fmt_image("half-color")
+    test_fmt_image("half-gray")
+    test_fmt_image("color")
+    test_fmt_image("gray")
+    test_fmt_image_ascii()
+    print("Elapsed time:", time.time() - s)
+
+    try:
+        from rich.progress import Progress
+        with Progress() as progress:
+            task = progress.add_task("[cyan]Processing...", total=50)
+            for i in range(50):
+                time.sleep(0.1)
+                progress.update(task, advance=1)
+                if i % 10 == 0:
+                    test_fmt_image("half-color")
+    except ImportError:
+        pass
+
+    try:
+        from tqdm import tqdm
+        for i in tqdm(range(50)):
+            time.sleep(0.1)
+            if i % 10 == 0:
+                test_fmt_image("half-color")
+    except ImportError:
+        pass

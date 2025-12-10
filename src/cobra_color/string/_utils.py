@@ -2,14 +2,26 @@
 # Python version: 3.9
 # @TianZhen
 
-from __future__ import annotations
-from typing import (Tuple, Optional, Iterable, Union)
+from functools import wraps
+import re
+from typing import (Optional, Sequence, Iterable, Iterator, Tuple, Set, Any)
 
-from ..types import (ColorName, StyleName)
+
+def wrap_exc(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            args_repr = ", ".join(repr(a) for a in args)
+            kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
+            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}") from e
+    return wrapper
 
 
+# --------------- ANSI Code Utils ---------------
 # code of colors
-_COLOR_CODE = {
+__STANDARD_COLOR_MAP = {
     "d": "0",  # dark/black
     "r": "1",  # red
     "g": "2",  # green
@@ -19,8 +31,18 @@ _COLOR_CODE = {
     "c": "6",  # cyan
     "w": "7",  # white
 }
+__HIGHLIGHT_COLOR_MAP = {
+    "ld": "0",  # highlight dark/black
+    "lr": "1",  # highlight red
+    "lg": "2",  # highlight green
+    "ly": "3",  # highlight yellow
+    "lb": "4",  # highlight blue
+    "lm": "5",  # highlight magenta
+    "lc": "6",  # highlight cyan
+    "lw": "7",  # highlight white
+}
 # code of styles
-_STYLE_CODE = {
+__STYLE_MAP = {
     "bold": "1",
     "dim": "2",
     "italic": "3",
@@ -32,78 +54,111 @@ _STYLE_CODE = {
     "del": "9",
     "delete": "9"
 }
+__STYLE_CODE = set(__STYLE_MAP.values())
+
+__ANSI_RE = re.compile(r"\x1b\[([\d;]+)m")
+__STYLE_RE = re.compile(rf"(?<![34]8;)\b[{''.join(__STYLE_CODE)}]\b")
+# __FG_RE = re.compile(r"[39][0-7]|38;(?:5(?:;\d{1,3})?|2(?:;\d{1,3}){0,3})")
+# __BG_RE = re.compile(r"(?:4|10)[0-7]|48;(?:5(?:;\d{1,3})?|2(?:;\d{1,3}){0,3})")
+__COLOR_RE = re.compile(r"([39][0-7])|((?:4|10)[0-7])")
 
 
-def get_ansi_code(
-    fg: Optional[Union[ColorName, int, Iterable[int]]],
-    bg: Optional[Union[ColorName, int, Iterable[int]]],
-    styles: Iterable[StyleName]
-) -> Tuple[str, str]:
+def _fmt_ansicolor(
+    code_iter: Iterator[Any],
+    /,
+    c_code: Any = "",
+    c_mode: Any = "",
+) -> Tuple[Optional[str], Optional[str]]:
     r"""
-    Generate ANSI code for style and color.
+    Format ANSI color code from an iterator of codes.
+    Return foreground and background color codes.
     """
-    def _parse_color(
-        c: Union[ColorName, int, Iterable[int]],
-        is_fg: bool
-    ) -> str:
+    def _fmt_args(code: str):
         r"""
-        Parse the color input into ANSI color code.
+        Format the arguments for ANSI color code.
         """
-        parse = ""
-        if isinstance(c, str):
-            # Basic 8 color OR Light 8 color
-            if c in _COLOR_CODE:
-                # Basic 8 color
-                parse = ("3" if is_fg else "4") + _COLOR_CODE[c]
-            elif c.startswith("l") and len(c) == 2 and c[1] in _COLOR_CODE:
-                # Light 8 color
-                parse = ("9" if is_fg else "10") + _COLOR_CODE[c[1]]
-        elif isinstance(c, int) and 0 <= c <= 255:
+        mode = str(c_mode or next(code_iter, ""))
+        if mode == "5":
             # 256 color
-            parse = ("38" if is_fg else "48") + f";5;{c}"
-        elif isinstance(c, Iterable) and all(isinstance(val, int) and 0 <= val <= 255 for val in c):
-            # True color
-            rgb = (list(c) + [0, 0, 0])[:3]
-            parse = ("38" if is_fg else "48") + f";2;{rgb[0]};{rgb[1]};{rgb[2]}"
+            val_256 = int(next(code_iter, "0") or "0") % 256
+            return f"{code};5;{val_256}"
+        elif mode == "2":
+            # true color
+            val_r = int(next(code_iter, "0") or "0") % 256
+            val_g = int(next(code_iter, "0") or "0") % 256
+            val_b = int(next(code_iter, "0") or "0") % 256
+            return f"{code};2;{val_r};{val_g};{val_b}"
 
-        return parse
+    code = str(c_code or next(code_iter, ""))
+    if code:
+        if code == "38":
+            # foreground color
+            return (_fmt_args("38"), None)
+        elif code == "48":
+            # background color
+            return (None, _fmt_args("48"))
+        else:
+            # try basic or highlight color
+            m = __COLOR_RE.fullmatch(code)
+            if m:
+                return (m.group(1), m.group(2))
+    return (None, None)
 
-    # style_code
-    if isinstance(styles, Iterable):
-        style_code = ";".join(_STYLE_CODE[s] for s in styles if s in _STYLE_CODE)
-    else:
-        style_code = ""
-    # color_code
-    foreground = "" if fg is None else _parse_color(fg, is_fg=True)
-    background = "" if bg is None else _parse_color(bg, is_fg=False)
-    color_code = ";".join((foreground, background)).strip(";")
 
-    return style_code, color_code
-
-
-def assemble_segments(
-    segments: Iterable[Tuple[str, str, str]],
-    use_color: bool = True,
-    use_style: bool = True
-) -> str:
+def _to_color_code(c: Any, /, is_fg: bool) -> Optional[str]:
     r"""
-    Assemble segments into a single ANSI formatted string.
+    Parse the color input into ANSI color code.
     """
-    result = ""
-    for plain, color_code, style_code in segments:
-        if not plain:
-            continue
-
-        if use_color and use_style:
-            codes = f"{style_code};{color_code}"
-        elif use_color or use_style:
-            codes = color_code if use_color else style_code
+    if isinstance(c, str):
+        # Basic 8 color OR Light 8 color
+        if c in __STANDARD_COLOR_MAP:  # "d"
+            # Basic 8 color. e.g.: 31, 42
+            return ("3" if is_fg else "4") + __STANDARD_COLOR_MAP[c]
+        elif c in __HIGHLIGHT_COLOR_MAP:  # "ld"
+            # Light 8 color. e.g.: 91, 102
+            return ("9" if is_fg else "10") + __HIGHLIGHT_COLOR_MAP[c]
         else:
-            codes = ""
-        codes = codes.strip(";")
-        if codes:
-            result += f"\033[{codes}m{plain}\033[0m"
-        else:
-            result += plain
+            # try ANSI color code
+            fg, bg = _fmt_ansicolor(iter(c.split(";")))
+            return fg if is_fg else bg
+    elif isinstance(c, int) or isinstance(c, Sequence):
+        # 256 color. e.g.: 38;5;196 OR True color. e.g.: 38;2;255;0;0
+        fg, bg = _fmt_ansicolor(
+            iter((c,) if isinstance(c, int) else c),
+            c_code="38" if is_fg else "48",
+            c_mode="5" if isinstance(c, int) else "2"
+        )
+        return fg if is_fg else bg
 
-    return result
+
+def to_fgcode(c: Any, /) -> Optional[str]:
+    r"""
+    Parse the color input into ANSI foreground color code.
+    """
+    return _to_color_code(c, is_fg=True)
+
+
+def to_bgcode(c: Any, /) -> Optional[str]:
+    r"""
+    Parse the color input into ANSI background color code.
+    """
+    return _to_color_code(c, is_fg=False)
+
+
+def to_style_codes(styles: Any, /) -> Set[str]:
+    r"""
+    Parse the styles into ANSI style codes.
+    """
+    if isinstance(styles, str):
+        if styles in __STYLE_MAP:
+            # style name
+            return {__STYLE_MAP[styles]}
+        # try ANSI style codes directly
+        return set(__STYLE_RE.findall(styles))
+    elif isinstance(styles, Iterable):
+        style_codes = styles if isinstance(styles, Set) else set(styles)
+        result = __STYLE_CODE.intersection(style_codes)
+        if result:
+            return result
+        return {__STYLE_MAP[s] for s in style_codes if s in __STYLE_MAP}
+    return set()

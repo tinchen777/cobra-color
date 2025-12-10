@@ -217,3 +217,5 @@ test.py
 pypi_upload.sh
 
 history/
+
+.draft/

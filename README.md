@@ -59,22 +59,22 @@ pip install cobra-color
 - Render an image in the terminal:
 
     ```python
-    from cobra_color.draw import fmt_image, smart_print
+    from cobra_color.render import imgfile_to_ansi, smart_print
 
     # ASCII art
-    smart_print(fmt_image("example.jpg", width=80, mode="ascii"))
+    smart_print(imgfile_to_ansi("example.jpg", width=80, mode="ascii"))
 
     # Half-block color (recommended for truecolor terminals)
-    smart_print(fmt_image("example.jpg", width=80, mode="half-color"))
+    imgfile_to_ansi("example.jpg", width=80, mode="half-color", display=True)
     ```
 
 - Render some text with fonts in the terminal:
 
     ```python
-    from cobra_color.draw import fmt_font, FontName, smart_print
+    from cobra_color.draw import fonttext_to_ansi, FontName, smart_print
 
     # Borderless grayscale font
-    smart_print(fmt_font("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
+    smart_print(fonttext_to_ansi("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
     ```
 
 ## Image Modes

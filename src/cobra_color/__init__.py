@@ -7,15 +7,16 @@ A lightweight Python package for terminal display enhancements.
 
 Modules
 -------
-- :mod:`cobra_color.draw`： Drawing utilities for rendering text and images in the terminal.
-- :mod:`cobra_color.string`： Colored string manipulation and generation.
-- :mod:`cobra_color.format`： Formatting utilities for structured data display.
+- :mod:`cobra_color.string`: Colored string manipulation and generation.
+- :mod:`cobra_color.render`: Rendering utilities for rendering text and images in the terminal.
+- :mod:`cobra_color.format`: Formatting utilities for structured data display.
+- :mod:`cobra_color.output`: Output utilities for smart printing in the terminal.
 Functions
 ---------
-- :func:`ctext()`： Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
-- :func:`compile_template()`： Create a template for generating :class:`ColorStr` instances with preset styles.
-- :func:`smart_print()`： A smart print function that works well with progress bars from `tqdm` and `rich` consoles.
-- :func:`set_console_func()`： Set a global console for smart_print function.
+- :func:`ctext()`: Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`to_ansi()`: Convert an object to an ANSI formatted :class:`ExtStr`.
+- :func:`smart_print()`: A smart print function that works well with progress bars from `tqdm` and `rich` consoles.
+- :func:`set_console_func()`: Set a global console for smart_print function.
 
 Examples
 --------
@@ -38,34 +39,34 @@ Render a text in the terminal::
     # You can continue to use str's proprietary functions and keep the existing colors and styles.
     c_text_1.upper()
 
-Render an image in the terminal::
+Render an image in the terminal:
 
-    from cobra_color.draw import fmt_image, smart_print
+    from cobra_color.render import imgfile_to_ansi, smart_print
 
     # ASCII art
-    smart_print(fmt_image("example.jpg", width=80, mode="ascii"))
+    smart_print(imgfile_to_ansi("example.jpg", width=80, mode="ascii"))
 
     # Half-block color (recommended for truecolor terminals)
-    smart_print(fmt_image("example.jpg", width=80, mode="half-color"))
+    imgfile_to_ansi("example.jpg", width=80, mode="half-color", display=True)
 
-Render some text with fonts in the terminal::
+Render some text with fonts in the terminal:
 
-    from cobra_color.draw import fmt_font, FontName, smart_print
+    from cobra_color.draw import fonttext_to_ansi, FontName, smart_print
 
     # Borderless grayscale font
-    smart_print(fmt_font("Hello World!", font=FontName.LLDISCO, mode="half-gray", trim_border=True))
+    smart_print(fonttext_to_ansi("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
 """
 
-from .string import (ctext, compile_template)
-from .output import (smart_print, set_console_func)
+from .string import (ctext, to_ansi)
+from .output import (smart_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "0.3.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "ctext",
-    "compile_template",
+    "to_ansi",
     "smart_print",
-    "set_console_func"
+    "set_console"
 ]

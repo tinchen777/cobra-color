@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.9
 # @TianZhen
+"""
+Output utilities for :pkg:`cobra_color` package.
+"""
 
 from __future__ import annotations
 import builtins
@@ -13,15 +16,15 @@ except ImportError:
     tqdm = None
 
 try:
-    from rich.console import Console  # type: ignore
+    from rich.console import Console as richConsole  # type: ignore
 except ImportError:
-    Console = None
+    richConsole = None
 
 
-_GLOBAL_CONSOLE_FUNC: Optional[ConsoleFunc] = None  # output function
+_GLOBAL_CONSOLE: Optional[Console] = None  # output function
 
 
-def set_console_func(func: Callable[..., Any], **kwargs: Any):
+def set_console(func: Callable[..., Any], **kwargs: Any):
     r"""
     Set a global console for smart_print function.
 
@@ -33,22 +36,11 @@ def set_console_func(func: Callable[..., Any], **kwargs: Any):
         **kwargs : Any
             Additional keyword arguments to be passed to the console function during each call.
     """
-    global _GLOBAL_CONSOLE_FUNC
-    _GLOBAL_CONSOLE_FUNC = ConsoleFunc(func, **kwargs)
+    global _GLOBAL_CONSOLE
+    _GLOBAL_CONSOLE = Console(func, **kwargs)
 
 
-def _get_global_console():
-    r"""
-    Get the global console function.
-    """
-    # set default console
-    if _GLOBAL_CONSOLE_FUNC is None and Console is not None:
-        set_console_func(Console().print, end="", markup=False, highlight=False)
-
-    return _GLOBAL_CONSOLE_FUNC
-
-
-class ConsoleFunc():
+class Console():
     r"""
     A wrapper for console output functions with preset keyword arguments.
     """
@@ -57,9 +49,7 @@ class ConsoleFunc():
         self.__kwargs = kwargs
 
     def __call__(self, *args, **kwargs) -> Any:
-        all_kwargs = self.__kwargs.copy()
-        all_kwargs.update(kwargs)
-        return self.__func(*args, **all_kwargs)
+        return self.__func(*args, **{**self.__kwargs, **kwargs})
 
 
 def smart_print(
@@ -68,7 +58,7 @@ def smart_print(
     end: str = "\n",
     file: Optional[Any] = None,
     flush: bool = False,
-    console_func: Optional[Union[Callable[..., Any], ConsoleFunc]] = None
+    console: Optional[Union[Callable[..., Any], Console, Any]] = None
 ):
     r"""
     A smart print function that works well with progress bars from :pkg:`tqdm` and :pkg:`rich` consoles.
@@ -96,27 +86,32 @@ def smart_print(
             - `Callable[..., Any]` or :class:`ConsoleFunc`: Use the provided function.
     """
     # determine output function and kwargs
-    if console_func is not None:
-        # Use provided console
-        if not isinstance(console_func, ConsoleFunc):
-            console_func = ConsoleFunc(console_func, end="")
-        used_func = console_func
+    func = None
+    if console is not None:
+        if tqdm is not None and isinstance(console, tqdm) and getattr(tqdm, "_instances", None):
+            func = Console(tqdm.write, end=end)
+        elif richConsole is not None and isinstance(console, richConsole):
+            func = Console(console.print, end=end, markup=False, highlight=False, overflow="ignore", crop=False)
+        elif isinstance(console, Callable):
+            func = Console(console, end=end)
+        elif isinstance(console, Console):
+            func = console
     else:
         if tqdm is not None and getattr(tqdm, "_instances", None):
             # Use tqdm write
-            used_func = ConsoleFunc(tqdm.write, end="")
+            func = Console(tqdm.write, end=end)
         else:
             # Use global console
-            used_func = _get_global_console()
+            func = _GLOBAL_CONSOLE
 
     def _default_print():
         builtins.print(*values, sep=sep, end=end, file=file, flush=flush)
 
     # output
-    if used_func is None:
+    if func is None:
         _default_print()
     else:
         try:
-            used_func(sep.join(map(str, values)) + end)
+            func(sep.join(map(str, values)))
         except Exception:
             _default_print()

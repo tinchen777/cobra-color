@@ -1,24 +1,28 @@
 # src/cobra_color/string/__init__.py
 """
-String utilities for cobra-color.
+String utilities for :pkg:`cobra_color` package.
 
 Functions
 ---------
-- :func:`ctext()`： Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
-- :func:`compile_template()`： Create a template for generating :class:`ColorStr` instances with preset styles.
-
+- :func:`ctext()`: Generate a easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`to_ansi()`: Convert an object to an ANSI formatted :class:`ExtStr`.
+- :func:`ansi_to_segments()`: Parse an ANSI formatted string into a list of :class:`ColorSeg` segments.
 Classes
 -------
-- :class:`ColorStr`： An easy-to-use `rich str` class with perfect support for :class:`str`.
-- :class:`ColorTemplate`： A template class for generating :class:`ColorStr` instances with preset styles.
+- :class:`ColorStr`: An easy-to-use `rich str` class with perfect support for :class:`str`.
+- :class:`ExtStr`: An `extended str` class that extends the built-in :class:`str` class.
+- :class:`ColorSeg`: A segment of color and style information for :class:`ColorStr`.
 """
 
-from ._color import (ctext, ColorStr)
-from ._template import (compile_template, ColorTemplate)
+from ._color import (ctext, to_ansi, ColorStr)
+from ._extension import ExtStr
+from ._segment import (ColorSeg, ansi_to_segments)
 
 __all__ = [
     "ctext",
+    "to_ansi",
     "ColorStr",
-    "compile_template",
-    "ColorTemplate"
+    "ExtStr",
+    "ColorSeg",
+    "ansi_to_segments"
 ]
