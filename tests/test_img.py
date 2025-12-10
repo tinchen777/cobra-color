@@ -27,7 +27,6 @@ def test_fmt_image():
     _fmt_image("color")
     _fmt_image("gray")
     test_fmt_image_ascii()
-    print("Elapsed time:", time.time() - s)
 
     try:
         from rich.progress import Progress
