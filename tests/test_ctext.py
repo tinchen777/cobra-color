@@ -37,6 +37,7 @@ def test_ColorStr():
     print(a)
     print(a._SEGMENTS)
     print(a[3:10])
+    print(a._loc(-22))
 
     print(a.apply("modified"*3, start_idx=3, extend="left"))
     print(a.rapply("modified"*3, start_idx=3, extend=None))
@@ -87,6 +88,12 @@ def test_ColorStr():
 
     print(a.splitlines())
 
+    print(a.insert(-1, ctext("123456", fg="g"), overwrite=True))
+    print(a.insert(-1, ctext("123456", fg="g")))
+    print(a.insert(-1, ctext("123456", fg="g"), overwrite=True, keep_pattern=False))
+    print(a.insert(-1, ctext("123456", fg="g"), keep_pattern=False))
+    
+
     print(ctext("2") in a)
 
     for i in a:
@@ -110,6 +117,11 @@ def test_ColorStr():
     b = a.recolor(fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
     print(b)
     print(b._SEGMENTS)
+    print(a)
+    c = a.recolor(slice(4, 7), fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
+    print(c)
+    print(c._SEGMENTS)
+    print(a)
 
     print(ctext("\u2580", fg=(42, 42, 42), bg=(31, 31, 31)))
     print(a("123"))

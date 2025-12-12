@@ -230,6 +230,8 @@ class ColorStr(ExtStr):
 
     def recolor(
         self,
+        apply_range: Optional[slice] = None,
+        /,
         fg: Optional[Union[Sequence[Tuple[Any, Any]], str]] = None,
         bg: Optional[Union[Sequence[Tuple[Any, Any]], str]] = None,
         styles: Optional[Union[Sequence[Tuple[Any, Any]], Set[str]]] = None
@@ -239,6 +241,11 @@ class ColorStr(ExtStr):
 
         Parameters
         ----------
+            apply_range : Optional[slice], default to `None`
+                The range to which the recoloring and restyling will be applied.
+                - `None`: Apply to the entire :class:`ColorStr`.
+                - `slice`: A slice object defining the range.
+
             fg : Optional[Union[Sequence[Tuple[Any, Any]], str]], default to `None`
                 The `mapping pairs` or `single value` for foreground color replacement.
                 - `None`: No change.
@@ -297,14 +304,15 @@ class ColorStr(ExtStr):
             styles = [(to_style(k), to_style(v)) for k, v in styles]
         else:
             styles = [("all", to_style(styles))]
-        # rebuild segments
-        new_segments: List[ColorSeg] = []
-        for seg in self._SEGMENTS:
-            seg = seg.copy()
+        # rebuild
+        if apply_range is None:
+            apply_range = slice(0, len(self))
+        start, stop, _ = self._loc(apply_range)
+        sub_ = self[start: stop]
+        for seg in sub_._SEGMENTS:
             seg._update(fg=fg, bg=bg, styles=styles)
-            new_segments.append(seg)
 
-        return ColorStr(*new_segments, copy=False)
+        return self.insert(start, sub_, overwrite=True)
 
     def pieces(self) -> List[ColorStr]:
         r"""
@@ -542,6 +550,48 @@ class ColorStr(ExtStr):
     def replace(self, old: Any, new: Any, /, count: Any = -1) -> ColorStr:
         return _to_ColorStr(new).join(self.split(old, maxsplit=count))
 
+    def insert(
+        self,
+        index: int,
+        sub: Any,
+        /,
+        overwrite: bool = False,
+        keep_pattern: bool = True
+    ) -> ColorStr:
+        r"""
+        Insert a substring into the :class:`ColorStr` at the specified index.
+
+        Parameters
+        ----------
+            index : int
+                The index at which to insert the substring.
+
+            sub : Any
+                The substring to insert.
+
+            overwrite : bool, default to `False`
+                Whether to overwrite existing content at the insertion point.
+
+            keep_pattern : bool, default to `True`
+                Whether to keep the original pattern of the string.
+
+        Returns
+        -------
+            ColorStr
+                The new :class:`ColorStr` with the substring inserted.
+        """
+        index = self._loc(index)
+        sub_ = _to_ColorStr(sub)
+        if not keep_pattern:
+            if overwrite:
+                sub_ = self.apply(sub_, start_idx=-index)
+            else:
+                sub_ = self[index].apply(sub_, extend="all")
+
+        if overwrite:
+            return self[0: index] + sub_ + self[index + len(sub_):]
+        return self[0: index] + sub_ + self[index:]
+
     @_fixed_method
     def capitalize(self) -> ColorStr: ...
 
@@ -623,6 +673,34 @@ class ColorStr(ExtStr):
         """
         return ColorStr(*self._SEGMENTS)
 
+    @overload
+    def _loc(self, s: slice, /) -> Tuple[int, int, int]: ...
+
+    @overload
+    def _loc(self, idx: int, /) -> int: ...
+
+    @overload
+    def _loc(self, start: int, end: int, /) -> Tuple[int, int]: ...
+
+    def _loc(self, start: Union[slice, int], end: Optional[int] = None, /):
+        r"""
+        Get the valid start and end indices for slicing.
+        """
+        # slice
+        if isinstance(start, slice):
+            start_idx, end_idx, step = start.indices(len(self))
+            return start_idx, end_idx, step
+        # single index
+        if end is None:
+            if start < 0:
+                start += len(self)
+            if start < 0 or start >= len(self):
+                raise IndexError(f"ColorStr Index:{start} Out Of Range:[-{len(self)}, {len(self)}).")
+            return start
+        # slice indices
+        start_idx, end_idx, _ = slice(start, end).indices(len(self))
+        return start_idx, end_idx
+
     def __call__(self, text: Any, /) -> ColorStr:
         return self.apply(text)
 
@@ -649,8 +727,8 @@ class ColorStr(ExtStr):
     def __ne__(self, value: Any, /):
         return not self.__eq__(value)
 
-    def __contains__(self, key: Any, /):
-        return self.find(key) != -1
+    def __contains__(self, value: Any, /):
+        return self.find(value) != -1
 
     def __iter__(self):
         for i in range(len(self)):
@@ -658,34 +736,25 @@ class ColorStr(ExtStr):
 
     def __getitem__(self, key: Any, /):
         if isinstance(key, slice):
-            start, stop, step = key.indices(len(self))
+            start, stop, step = self._loc(key)
             if step != 1:
                 return ColorStr.from_str(super().__getitem__(key))
             # slice segments for non-step slices
-            start_idx = 0
             new_segments: List[ColorSeg] = []
             for seg in self._SEGMENTS:
-                left_idx = max(start_idx, start)
+                left_idx = max(seg.istart, start)
                 right_idx = min(stop, seg.iend)
                 if left_idx <= right_idx:
                     new_segments.append(seg(self.plain[left_idx: right_idx]))
-                # update
-                start_idx = seg.iend
             return ColorStr(*new_segments, copy=False)
         elif isinstance(key, int):
-            if key < 0:
-                key += len(self)
-            if key < 0 or key >= len(self):
-                raise IndexError(f"ColorStr Index:{key} Out Of Range:[-{len(self)}, {len(self)}).")
+            key = self._loc(key)
             # find segment
-            start_idx = 0
             for seg in self._SEGMENTS:
-                if start_idx <= key < seg.iend:
+                if seg.istart <= key < seg.iend:
                     return ColorStr(seg(self.plain[key]), copy=False)
-                # update
-                start_idx = seg.iend
             # should not reach here
-            raise IndexError("ColorStr index out of range")
+            raise IndexError("ColorStr Index Out Of Range")
         else:
             return ColorStr.from_str(super().__getitem__(key))
 

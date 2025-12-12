@@ -43,6 +43,9 @@ def test_ColorSeg():
     f._update(fg="y", bg="m", styles=[({"bold"}, {"udl"})])
     print(f)
 
+    print(f.to_subseg(105, 110))
+    print(f.to_subseg(111))
+
 
 if __name__ == "__main__":
     test_ColorSeg()

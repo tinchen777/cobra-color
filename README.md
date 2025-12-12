@@ -74,7 +74,12 @@ pip install cobra-color
     from cobra_color.draw import fonttext_to_ansi, FontName, smart_print
 
     # Borderless grayscale font
-    smart_print(fonttext_to_ansi("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
+    smart_print(fonttext_to_ansi(
+        "Hello World!",
+        font=FontName.LLDISCO,
+        mode="half-gray",
+        trim_border=True
+    ))
     ```
 
 ## Image Modes

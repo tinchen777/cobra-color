@@ -185,9 +185,58 @@ class ColorSeg:
         Returns
         -------
             ColorSeg
-                A new :class:`ColorSeg` instance with the applied string.
+                A new :class:`ColorSeg` instance.
         """
         return ColorSeg(text, self.fg, self.bg, self.styles)
+
+    def to_subseg(
+        self,
+        left: int,
+        right: Optional[int] = None,
+        /
+    ) -> Tuple[ColorSeg, ColorSeg, ColorSeg]:
+        r"""
+        Split the :class:`ColorSeg` instance into three parts: left, middle, and right segments based on the specified indices.
+
+        Parameters
+        ----------
+            left : int
+                The start index of the middle segment.
+
+            right : Optional[int], default to `None`
+                The end index of the middle segment. If `None`, it defaults to `left + 1`.
+
+        Returns
+        -------
+            Tuple[ColorSeg, ColorSeg, ColorSeg]
+                A tuple containing the left, middle, and right :class:`ColorSeg` instances with updated indices.
+        """
+        def _create_seg(start: int, end: int, /):
+            r"""
+            Create a ColorSeg for the specified substring.
+            """
+            plain = self.plain[start: end]
+            if len(plain) == 0:
+                return ColorSeg.empty()
+            seg = self(plain)
+            seg.set_istart(self.istart + start)
+            return seg
+
+        # index
+        if self.istart <= left < self.iend:
+            left_idx = left - self.istart
+        else:
+            raise IndexError(f"Left Index {left} Out Of Range [{self.istart}, {self.iend})")
+        right = left + 1 if right is None else right
+        if self.istart < right <= self.iend:
+            right_idx = right - self.istart
+        else:
+            raise IndexError(f"Right Index {right} Out Of Range ({self.istart}, {self.iend}]")
+        return (
+            _create_seg(0, left_idx),
+            _create_seg(left_idx, right_idx),
+            _create_seg(right_idx, len(self.plain))
+        )
 
     def to_str(self) -> ExtStr:
         r"""
@@ -195,7 +244,7 @@ class ColorSeg:
         """
         return self.assemble("fg", "bg", "styles")
 
-    def _update_plain(self, target: Any, /, mode: Literal["=", "+="]):
+    def _update_plain(self, target: Any, /, mode: Literal["=", "+="] = "="):
         r"""
         Modify the plain string of the :class:`ColorSeg` instance.
         """
@@ -283,6 +332,9 @@ class ColorSeg:
             raise RuntimeError("Failed To Rebuild ColorSeg Instance.") from e
 
     def __call__(self, text: Any, /) -> ColorSeg:
+        r"""
+        Apply the color and style of the :class:`ColorSeg` instance to a new string.
+        """
         return self.apply(text)
 
     def __repr__(self) -> str:

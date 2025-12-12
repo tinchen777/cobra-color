@@ -54,7 +54,12 @@ Render some text with fonts in the terminal:
     from cobra_color.draw import fonttext_to_ansi, FontName, smart_print
 
     # Borderless grayscale font
-    smart_print(fonttext_to_ansi("Hello World!", font=FontName.LLDISCO,, mode="half-gray", trim_border=True))
+    smart_print(fonttext_to_ansi(
+        "Hello World!",
+        font=FontName.LLDISCO,
+        mode="half-gray",
+        trim_border=True
+    ))
 """
 
 from .string import (ctext, to_ansi)
@@ -62,7 +67,7 @@ from .output import (smart_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 __all__ = [
     "ctext",
