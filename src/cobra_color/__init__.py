@@ -67,7 +67,7 @@ from .output import (smart_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 __all__ = [
     "ctext",

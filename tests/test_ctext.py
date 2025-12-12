@@ -1,7 +1,7 @@
 # tests/test_ctext.py
 
-# import sys
-# sys.path.append("/data/tianzhen/my_packages/cobra-color/src")
+import sys
+sys.path.append("/data/tianzhen/my_packages/cobra-color/src")
 
 from cobra_color import ctext
 from cobra_color.string import (ColorStr, to_ansi)
@@ -118,7 +118,7 @@ def test_ColorStr():
     print(b)
     print(b._SEGMENTS)
     print(a)
-    c = a.recolor(slice(4, 7), fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
+    c = a.recolor(slice(4, 7), fg="y", bg="m")
     print(c)
     print(c._SEGMENTS)
     print(a)

@@ -287,23 +287,26 @@ class ColorStr(ExtStr):
                 The recolored and restyled :class:`ColorStr`.
         """
         # foreground mapping
-        to_fg = lambda x: "" if x == "" else to_fgcode(x)
-        if isinstance(fg, Sequence) and not isinstance(fg, str):
-            fg = [(to_fg(k), to_fg(v)) for k, v in fg]
-        else:
-            fg = to_fg(fg)
+        if fg is not None:
+            to_fg = lambda x: "" if x == "" else to_fgcode(x)
+            if isinstance(fg, Sequence) and not isinstance(fg, str):
+                fg = [(to_fg(k), to_fg(v)) for k, v in fg]
+            else:
+                fg = to_fg(fg)
         # background mapping
-        to_bg = lambda x: "" if x == "" else to_bgcode(x)
-        if isinstance(bg, Sequence) and not isinstance(bg, str):
-            bg = [(to_bg(k), to_bg(v)) for k, v in bg]
-        else:
-            bg = to_bg(bg)
+        if bg is not None:
+            to_bg = lambda x: "" if x == "" else to_bgcode(x)
+            if isinstance(bg, Sequence) and not isinstance(bg, str):
+                bg = [(to_bg(k), to_bg(v)) for k, v in bg]
+            else:
+                bg = to_bg(bg)
         # styles mapping
-        to_style = lambda x: None if x is None else to_style_codes(x)
-        if isinstance(styles, Sequence) and not isinstance(styles, str):
-            styles = [(to_style(k), to_style(v)) for k, v in styles]
-        else:
-            styles = [("all", to_style(styles))]
+        if styles is not None:
+            to_style = lambda x: None if x is None else to_style_codes(x)
+            if isinstance(styles, Sequence) and not isinstance(styles, str):
+                styles = [(to_style(k), to_style(v)) for k, v in styles]
+            else:
+                styles = [("all", to_style(styles))]
         # rebuild
         if apply_range is None:
             apply_range = slice(0, len(self))
@@ -742,6 +745,8 @@ class ColorStr(ExtStr):
             # slice segments for non-step slices
             new_segments: List[ColorSeg] = []
             for seg in self._SEGMENTS:
+                if start >= seg.iend or stop <= seg.istart:
+                    continue
                 left_idx = max(seg.istart, start)
                 right_idx = min(stop, seg.iend)
                 if left_idx <= right_idx:
