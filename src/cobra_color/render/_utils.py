@@ -46,7 +46,7 @@ def image_to_ansi(
             String representation of the rendered image.
     """
     if mode not in VALID_MODES:
-        raise ValueError(f"Unknown mode(ImgFillingModeName): {mode!r}. Valid Modes: {VALID_MODES}")
+        raise ValueError(f"Param `mode` Of image_to_ansi() Must Be In {VALID_MODES}, Got {mode!r}.")
     if "color" not in mode:
         # Convert to grayscale
         img = img.convert("L")
@@ -156,9 +156,9 @@ def binarize_image(
             elif arr_shape[-1] == 1:
                 arr = arr.reshape(arr_shape[0], arr_shape[1])
             else:
-                raise ValueError(f"Input 3-D Array's Last Dimension Must Be 1 (Grayscale) Or 3 (RGB), Not {arr_shape[-1]}.")
+                raise ValueError(f"Param `src` Of binarize_image() For 3-D Image, Last Dimension Must Be 1 (Grayscale) Or 3 (RGB), Got {arr_shape[-1]}.")
         if len(arr_shape) != 2:
-            raise ValueError(f"Input Array Must Be 2-D (Grayscale Image) Or 3-D (RGB Image), Not {arr_shape}.")
+            raise ValueError(f"Param `src` Of binarize_image() Must Be 2-D (Grayscale Image) Or 3-D (RGB Image) Image, Got {arr_shape}.")
     arr = arr.astype(np.uint8)
     rgb_arr = np.where(
         (arr > threshold)[..., None],  # mask expanded to 3-D

@@ -101,7 +101,7 @@ class ColorSeg:
             self._style_codes = set(style_codes)
             self._style_codes.discard("")
         except TypeError:
-            raise TypeError("`style_codes` Of Class[ColorSeg] Must Be An Iterable Of Style Names.")
+            raise TypeError(f"Param `style_codes` Of ColorSeg Must Be An Iterable, Got {type(style_codes)}.")
         # init start index
         self._START_IDX = 0
 
@@ -226,12 +226,12 @@ class ColorSeg:
         if self.istart <= left < self.iend:
             left_idx = left - self.istart
         else:
-            raise IndexError(f"Left Index {left} Out Of Range [{self.istart}, {self.iend})")
+            raise IndexError(f"Start Index {left} Of ColorSeg Out Of Range [{self.istart}, {self.iend}).")
         right = left + 1 if right is None else right
         if self.istart < right <= self.iend:
             right_idx = right - self.istart
         else:
-            raise IndexError(f"Right Index {right} Out Of Range ({self.istart}, {self.iend}]")
+            raise IndexError(f"Right Index {right} Of ColorSeg Out Of Range ({self.istart}, {self.iend}].")
         return (
             _create_seg(0, left_idx),
             _create_seg(left_idx, right_idx),
@@ -254,7 +254,7 @@ class ColorSeg:
             elif mode == "+=":
                 self._plain += to_ExtStr(target)
             else:
-                raise ValueError(f"Invalid Mode For ColorSeg._update_plain(), Mode: {mode}.")
+                raise ValueError(f"Invalid Mode For ColorSeg._update_plain(), Got {mode}.")
 
     def _update_fg(self, target: Optional[str], to: Optional[str], /):
         r"""
@@ -328,8 +328,8 @@ class ColorSeg:
             if styles is not None:
                 for style_target, style_to in styles:
                     self._update_styles(style_target, style_to)
-        except Exception as e:
-            raise RuntimeError("Failed To Rebuild ColorSeg Instance.") from e
+        except Exception:
+            raise ValueError("ColorSeg._update() Error.")
 
     def __call__(self, text: Any, /) -> ColorSeg:
         r"""
@@ -365,7 +365,7 @@ class ColorSeg:
         if isinstance(args, Tuple):
             args = dict(zip(("plain", "fg", "bg", "styles", "start"), args))
         if not isinstance(args, Dict):
-            raise TypeError("`args` Of ColorSeg.__mod__() Must Be A Tuple Or A Dict.")
+            raise TypeError(f"Param `args` Of ColorSeg.__mod__() Must Be A Tuple Or A Dict, Got {type(args)}.")
         # start index
         seg = self.copy(istart=args.get("start"))
         # plain
@@ -387,7 +387,11 @@ class ColorSeg:
                     if isinstance(val, Sequence) and not isinstance(val, str) and len(val) >= 2:
                         seg._update_fg(to_fgcode(val[0]), to_fgcode(val[1]))
                     else:
-                        warnings.warn(f"Invalid Value For Key '@fg' In ColorSeg.__mod__(), @fg: {val}.", RuntimeWarning)
+                        warnings.warn(
+                            f"Invalid Value For Key '@fg' In ColorSeg.__mod__(), Got `@fg`: {val!r}.",
+                            category=UserWarning,
+                            stacklevel=2
+                        )
                 elif key == "-fg":
                     seg._update_fg(to_fgcode(val), "")
                 elif key == "+fg":
@@ -398,7 +402,11 @@ class ColorSeg:
                     if isinstance(val, Sequence) and not isinstance(val, str) and len(val) >= 2:
                         seg._update_bg(to_bgcode(val[0]), to_bgcode(val[1]))
                     else:
-                        warnings.warn(f"Invalid Value For Key '@bg' In ColorSeg.__mod__(), @bg: {val}.", RuntimeWarning)
+                        warnings.warn(
+                            f"Invalid Value For Key '@bg' In ColorSeg.__mod__(), Got `@bg`: {val!r}.",
+                            category=UserWarning,
+                            stacklevel=2
+                        )
                 elif key == "-bg":
                     seg._update_bg(to_bgcode(val), "")
                 elif key == "+bg":
@@ -409,7 +417,11 @@ class ColorSeg:
                     if isinstance(val, Sequence) and not isinstance(val, str) and len(val) >= 2:
                         seg._update_styles(to_style_codes(val[0]), to_style_codes(val[1]))
                     else:
-                        warnings.warn(f"Invalid Value For Key '@styles' In ColorSeg.__mod__(), @styles: {val}.", RuntimeWarning)
+                        warnings.warn(
+                            f"Invalid Value For Key '@styles' In ColorSeg.__mod__(), Got `@styles`: {val!r}.",
+                            category=UserWarning,
+                            stacklevel=2
+                        )
                 elif key == "-styles":
                     seg._update_styles(to_style_codes(val), None)
                 elif key == "+styles":

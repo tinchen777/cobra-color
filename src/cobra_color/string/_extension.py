@@ -28,8 +28,8 @@ class ExtStr(str):
         """
         try:
             return cls("".join(strings))
-        except TypeError as e:
-            raise TypeError("All Elements In 'strings' Must Be Of Type 'str'.") from e
+        except TypeError:
+            raise TypeError("Create ExtStr From Iterable Of Strings Failed.")
 
     def __init__(self, *args, **kwargs):
         self._is_plain = not (self.isfgcolored or self.isbgcolored or self.isstyled)

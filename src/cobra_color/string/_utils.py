@@ -15,7 +15,7 @@ def wrap_exc(func):
         except Exception as e:
             args_repr = ", ".join(repr(a) for a in args)
             kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
-            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}") from e
+            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}.")
     return wrapper
 
 

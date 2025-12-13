@@ -1,7 +1,7 @@
 # tests/test_ctext.py
 
-# import sys
-# sys.path.append("/data/tianzhen/my_packages/cobra-color/src")
+import sys
+sys.path.append("/data/tianzhen/my_packages/cobra-color/src")
 
 import copy
 from cobra_color.string import ColorSeg

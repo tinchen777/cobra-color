@@ -3,13 +3,14 @@
 <h2 id="title">🐱‍👤 cobra-color 🐱‍👤</h2>
 
 [![PyPI version](https://img.shields.io/pypi/v/cobra-color.svg)](https://pypi.org/project/cobra-color/)
-![Python](https://img.shields.io/pypi/pyversions/cobra-color.svg)
-[![Tests](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml/badge.svg)](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml)
+![Python](https://img.shields.io/pypi/pyversions/cobra-color?color=brightgreen)
 [![codecov](https://codecov.io/gh/tinchen777/cobra-color/branch/main/graph/badge.svg)](https://codecov.io/gh/tinchen777/cobra-color)
 ![License](https://img.shields.io/github/license/tinchen777/cobra-color.svg)
 
-[![Pull Requests Welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)](https://github.com/tinchen777/cobra-color/pulls)
+[![Tests](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml/badge.svg)](https://github.com/tinchen777/cobra-color/actions/workflows/test.yml)
 ![Github stars](https://img.shields.io/github/stars/tinchen777/cobra-color.svg)
+
+<!-- [![Pull Requests Welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)](https://github.com/tinchen777/cobra-color/pulls) -->
 
 </div>
 

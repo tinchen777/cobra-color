@@ -145,7 +145,7 @@ def _extend_method(func):
     def wrapper(obj: ColorStr, width, fillchar=" ", /, extend=None):
         # width
         if not isinstance(width, int):
-            raise TypeError(f"Argument 'width' Must Be An Integer, Got {type(width)}.")
+            raise TypeError(f"Param 'width' Of ColorStr.{func.__name__}() Must Be An Integer, Got {type(width)}.")
         if width <= len(obj):
             return obj.copy()
         # fillchar
@@ -366,7 +366,7 @@ class ColorStr(ExtStr):
             return c_text
         # check start_idx
         if not isinstance(start_idx, int):
-            raise TypeError(f"[ColorStr.apply()] Argument 'start_idx' Must Be An Integer, Got {type(start_idx)}.")
+            raise TypeError(f"Param 'start_idx' Of ColorStr.apply() Must Be An Integer, Got {type(start_idx)}.")
         # pattern
         src_str_len = len(self)
         if _from_left:
@@ -698,7 +698,7 @@ class ColorStr(ExtStr):
             if start < 0:
                 start += len(self)
             if start < 0 or start >= len(self):
-                raise IndexError(f"ColorStr Index:{start} Out Of Range:[-{len(self)}, {len(self)}).")
+                raise IndexError(f"Index {start} Of ColorStr Out Range [-{len(self)}, {len(self)}).")
             return start
         # slice indices
         start_idx, end_idx, _ = slice(start, end).indices(len(self))
@@ -759,7 +759,7 @@ class ColorStr(ExtStr):
                 if seg.istart <= key < seg.iend:
                     return ColorStr(seg(self.plain[key]), copy=False)
             # should not reach here
-            raise IndexError("ColorStr Index Out Of Range")
+            raise IndexError(f"Can Not Match Index {key} In ColorStr Segments.")
         else:
             return ColorStr.from_str(super().__getitem__(key))
 
