@@ -58,9 +58,11 @@ def test_ColorStr():
     print(a.rfind(cstr("a", fg="y").plain))
 
     seg = a.pieces()[2]
+    print(seg)
     seg2 = a.pieces()[3]
-    f = seg2.join([seg] * 3)
-    print(f)
+    print(seg2)
+    f = seg2.join([seg, seg, seg])
+    print("JOIN: ", f)
     print(f._SEGMENTS)
 
     print(a[:5].pieces()[-1])
@@ -76,7 +78,7 @@ def test_ColorStr():
     print(a.rsplit(cstr("b", fg="y"), maxsplit=1))
     print(a.splitlines(keepends=True))
 
-    print(a.replace(cstr("b", bg="lm", styles=["bold", "udl"]), cstr("BB", fg="y")))
+    print(a.replace(cstr("b", bg="lm", styles=["bold", "udl"]), cstr("BB", fg="y"), count=1))
 
     print(a.strip("a"))
     print(a.rstrip("f"))
@@ -93,7 +95,7 @@ def test_ColorStr():
     print(a.insert(-1, cstr("123456", fg="g"), overwrite=True, keep_pattern=False))
     print(a.insert(-1, cstr("123456", fg="g"), keep_pattern=False))
 
-    print(cstr("2") in a)
+    print(cstr("2", fg="d") in a)
 
     for i in a:
         print(i, end="|")
@@ -145,6 +147,8 @@ def test_ColorStr():
 
     print(f)
     print(f._SEGMENTS)
+
+    print(cstr("a", a, 1243, sep=cstr("sep", fg="y")))
 
 
 if __name__ == "__main__":

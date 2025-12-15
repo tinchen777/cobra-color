@@ -15,6 +15,7 @@ from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
 def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
     r"""
     Convert a single object to :class:`ExtStr`, with default value if empty.
+    Minimize copying.
     """
     plain = obj.plain if isinstance(obj, (ColorSeg, ColorStr)) else to_ExtStr(obj)
     return to_plain(default) if default is not None and len(plain) == 0 else plain
@@ -23,6 +24,7 @@ def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
 def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
     r"""
     Convert a single object to :class:`ColorStr`, with default value if empty.
+    Minimize copying.
     """
     if isinstance(obj, ColorStr):
         c_str = obj
@@ -33,11 +35,25 @@ def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
     return to_cstr(default) if default is not None and len(c_str) == 0 else c_str
 
 
+def to_segments(obj: Any, /) -> List[ColorSeg]:
+    r"""
+    Convert a single object to a list of :class:`ColorSeg` segments.
+    Minimize copying.
+    """
+    if isinstance(obj, ColorSeg):
+        return [obj]
+    elif isinstance(obj, ColorStr):
+        return obj._SEGMENTS
+    else:
+        return ansi_to_segments(to_plain(obj))
+
+
 def cstr(
     *objects: Any,
     fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
     bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-    styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
+    styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None,
+    sep: Any = ""
 ) -> ColorStr:
     r"""
     Generate an easy-to-use :class:`ColorStr` instance, `rich str`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
@@ -82,6 +98,9 @@ def cstr(
 
             NOTE: For styles mapping, the _key_ is a set of styles. If all styles in the _key_ are present in the segment, they will be replaced.
 
+        sep : Any, default to `""`
+            The separator used when concatenating multiple objects.
+
     Returns
     -------
         ColorStr
@@ -95,10 +114,10 @@ def cstr(
     >>> cstr("Hello World!", fg="r", styles=["bold", "udl"])
     >>> # 3. Rebuild a colored string with mapping rules.
     >>> cstr(c_str, fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
-    >>> # 4. Combine multiple objects into a colored string.
-    >>> cstr("a", c_str, 1243)
+    >>> # 4. Combine multiple objects into a colored string with sep.
+    >>> cstr("a", c_str, 1243, sep=cstr("sep", fg="y"))
     """
-    c_str = ColorStr.from_iter(*objects)
+    c_str = ColorStr.from_iter(*objects, sep=sep)
     if fg is not None or bg is not None or styles is not None:
         c_str._update(fg=fg, bg=bg, styles=styles)
     return c_str
@@ -191,19 +210,19 @@ class ColorStr(ExtStr):
         return cls(ColorSeg.from_raw(to_plain(str_), fg=fg, bg=bg, styles=styles), copy=False)
 
     @classmethod
-    def from_iter(cls, *objects: Any):
+    def from_iter(cls, *objects: Any, sep: Any = ""):
         r"""
         Create a :class:`ColorStr` instance from an iterable of objects.
         (Parameter ref to :func:`cstr()`)
         """
+        sep_segments = to_segments(sep)
+        first = True
         segments: List[ColorSeg] = []
         for obj in objects:
-            if isinstance(obj, ColorSeg):
-                segments.append(obj)
-            elif isinstance(obj, ColorStr):
-                segments.extend(obj._SEGMENTS)
-            else:
-                segments.extend(ansi_to_segments(to_plain(obj)))
+            if not first and sep_segments:
+                segments.extend(sep_segments)
+            first = False
+            segments.extend(to_segments(obj))
         return cls(*segments)
 
     def __new__(cls, *segments: ColorSeg, copy: bool = True):
@@ -232,9 +251,7 @@ class ColorStr(ExtStr):
 
         plain = ExtStr.from_iter(*(seg.plain for seg in new_segments))
         obj = super().__new__(cls, plain)
-        obj._is_fg_colored = any(seg.isfgcolored for seg in new_segments)
-        obj._is_bg_colored = any(seg.isbgcolored for seg in new_segments)
-        obj._is_styled = any(seg.isstyled for seg in new_segments)
+        obj._add_judgment(new_segments)
         obj._SEGMENTS = new_segments
         obj._plain = plain
 
@@ -395,23 +412,22 @@ class ColorStr(ExtStr):
         """
         if isinstance(sub, ColorStr) and not sub.isplain:
             # for ColorStr
-            sub_len = len(sub)
             if _reverse:
-                all_locs = self.plain.rfindall(sub.plain, start, end)
-                all_locs.reverse()
+                all_indices = self.plain.rfindall(sub.plain, start, end)
+                all_indices.reverse()
             else:
-                all_locs = self.plain.findall(sub.plain, start, end)
-            result: List[int] = []
+                all_indices = self.plain.findall(sub.plain, start, end)
+            indices: List[int] = []
             count = 0
-            for start_idx in all_locs:
-                if sub == self[start_idx: start_idx + sub_len]:
-                    result.append(start_idx)
+            for start_idx in all_indices:
+                if sub == self[start_idx: start_idx + len(sub)]:
+                    indices.append(start_idx)
                     count += 1
                     if maxsplit != -1 and count >= maxsplit:
                         break
             if _reverse:
-                result.reverse()
-            return result
+                indices.reverse()
+            return indices
         else:
             # for non-ColorStr
             if _reverse:
@@ -441,18 +457,11 @@ class ColorStr(ExtStr):
         return idx_list[0] if idx_list else -1
 
     def join(self, iterable: Iterable[Any], /) -> ColorStr:
-        segments: List[ColorSeg] = []
-        first = True
-        for item in iterable:
-            if not first:
-                segments.extend(self._SEGMENTS)
-            first = False
-            segments.extend(to_cstr(item)._SEGMENTS)
-        return ColorStr(*segments)
+        return ColorStr.from_iter(*iterable, sep=self)
 
     def split(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
         sep_ = to_ExtStr(sep)
-        new_segments: List[ColorStr] = []
+        new_subs: List[ColorStr] = []
         count = 0
         start_idx = 0
         end_idx = -1
@@ -461,18 +470,18 @@ class ColorStr(ExtStr):
             if end_idx == -1:
                 break
             # segment
-            new_segments.append(self[start_idx: end_idx])
+            new_subs.append(self[start_idx: end_idx])
             # update
             start_idx = end_idx + len(sep_)
             count += 1
         # last segment
-        new_segments.append(self[start_idx:])
+        new_subs.append(self[start_idx:])
 
-        return new_segments
+        return new_subs
 
     def rsplit(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
         sep_ = to_ExtStr(sep)
-        new_segments: List[ColorStr] = []
+        new_subs: List[ColorStr] = []
         count = 0
         end_idx = len(self)
         start_idx = -1
@@ -481,22 +490,22 @@ class ColorStr(ExtStr):
             if start_idx == -1:
                 break
             # segment
-            new_segments.append(self[start_idx + len(sep_): end_idx])
+            new_subs.append(self[start_idx + len(sep_): end_idx])
             # update
             end_idx = start_idx
             count += 1
         # last segment
-        new_segments.append(self[0: end_idx])
-        new_segments.reverse()
+        new_subs.append(self[0: end_idx])
+        new_subs.reverse()
 
-        return new_segments
+        return new_subs
 
     def splitlines(self, keepends: bool = False) -> List[ColorStr]:  # type: ignore[misc]
-        result = self.split("\n")
+        new_subs = self.split("\n")
         if keepends:
-            for i in range(len(result) - 1):
-                result[i] += "\n"
-        return result
+            for i in range(len(new_subs) - 1):
+                new_subs[i] += "\n"
+        return new_subs
 
     def partition(self, sep: Any, /, _reverse: bool = False) -> Tuple[ColorStr, ColorStr, ColorStr]:  # type: ignore
         sep_ = to_ExtStr(sep)
@@ -517,7 +526,7 @@ class ColorStr(ExtStr):
         return self.partition(sep, _reverse=True)
 
     def replace(self, old: Any, new: Any, /, count: Any = -1) -> ColorStr:
-        return to_cstr(new).join(self.split(old, maxsplit=count))
+        return ColorStr.from_iter(*self.split(old, maxsplit=count), sep=new)
 
     def insert(
         self,
@@ -590,7 +599,6 @@ class ColorStr(ExtStr):
         padding = width - len(self)
         left = padding // 2 + (padding % 2)
         right = padding // 2
-
         return left, right  # type: ignore
 
     @_extend_method
@@ -649,7 +657,9 @@ class ColorStr(ExtStr):
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
         r"""Update the color and style mapping of the :class:`ColorStr` in place.
-        (Ref to :func:`ColorStr.rebuild()`)"""
+        (Ref to :func:`ColorStr.rebuild()`)
+
+        NOTE: Adjacent segments with the same pattern in the updated :class:`ColorStr` will not be automatically merged."""
 
         def _fmt_c_mapping(m: Any, func: Any, /):
             r"""Format the color mapping input."""
@@ -683,10 +693,11 @@ class ColorStr(ExtStr):
         _bg = _fmt_c_mapping(bg, lambda x: "" if x == "" else to_bgcode(x))
         # styles mapping
         _styles = _fmt_s_mapping(styles, lambda x: None if x is None else to_style_codes(x))
-        print("fg:", _fg, "bg:", _bg, "styles:", _styles)
         # update
         for seg in self._SEGMENTS:
             seg._update(fg=_fg, bg=_bg, styles=_styles)
+        # update pattern judgement
+        self._add_judgment(self._SEGMENTS)
         # clear cached rich
         self.__dict__.pop("rich", None)
 

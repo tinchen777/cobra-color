@@ -8,7 +8,8 @@ from typing import (Optional, List, Any)
 
 def to_ExtStr(obj: Any, /) -> ExtStr:
     r"""
-    Convert an object to :class:`ExtStr`, direct conversion of `non-ExtStr` type.
+    Convert a single object to :class:`ExtStr`.
+    Ensure it is a subclass of :class:`ExtStr`.
     """
     return obj if isinstance(obj, ExtStr) else ExtStr(obj)
 
@@ -20,6 +21,7 @@ class ExtStr(str):
     _is_fg_colored: bool = False
     _is_bg_colored: bool = False
     _is_styled: bool = False
+    _is_plain: bool = True
 
     @classmethod
     def from_iter(cls, *objects: Any):
@@ -27,9 +29,6 @@ class ExtStr(str):
         Create an :class:`ExtStr` instance from an iterable of objects.
         """
         return cls("".join(map(to_ExtStr, objects)))
-
-    def __init__(self, *args, **kwargs):
-        self._is_plain = not (self.isfgcolored or self.isbgcolored or self.isstyled)
 
     def findall(
         self,
@@ -43,27 +42,26 @@ class ExtStr(str):
         r"""
         Find all occurrences of a substring in the :class:`ExtStr`.
         """
-        sub = to_ExtStr(sub)
-        sub_len = len(sub)
-        result: List[int] = []
+        sub_ = to_ExtStr(sub)
+        indices: List[int] = []
         count = 0
         start_idx = start
         end_idx = end if end is not None else len(self)
         while maxsplit == -1 or count < maxsplit:
             if _reverse:
-                idx = super().rfind(sub, start_idx, end_idx)
+                idx = super().rfind(sub_, start_idx, end_idx)
                 end_idx = idx
             else:
-                idx = super().find(sub, start_idx, end_idx)
-                start_idx = idx + sub_len
+                idx = super().find(sub_, start_idx, end_idx)
+                start_idx = idx + len(sub_)
             if idx == -1:
                 break
-            result.append(idx)
+            indices.append(idx)
             count += 1
         if _reverse:
-            result.reverse()
+            indices.reverse()
 
-        return result
+        return indices
 
     def rfindall(
         self,
@@ -77,6 +75,13 @@ class ExtStr(str):
         Find all occurrences of a substring in the :class:`ExtStr` in reverse order.
         """
         return self.findall(sub, start, end, maxsplit=maxsplit, _reverse=True)
+
+    def _add_judgment(self, segments: List[Any], /):
+        r"""Add pattern judgment attributes to the :class:`ExtStr` object."""
+        self._is_fg_colored = any(seg.isfgcolored for seg in segments)
+        self._is_bg_colored = any(seg.isbgcolored for seg in segments)
+        self._is_styled = any(seg.isstyled for seg in segments)
+        self._is_plain = not any((self.isfgcolored, self.isbgcolored, self.isstyled))
 
     def __add__(self, other: Any, /) -> ExtStr:
         return ExtStr(super().__add__(other))
