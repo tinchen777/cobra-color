@@ -13,7 +13,7 @@ Functions
 from typing import (Any, Mapping, Sequence, List)
 
 from .string import ColorSeg
-from .output import smart_print
+from .output import safe_print
 
 
 _STYLES = {
@@ -50,7 +50,7 @@ def fmt_dict(
             An optional title to be displayed at the top of the formatted output.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using :func:`smart_print()`.
+            Whether to print the formatted output to the terminal using :func:`safe_print()`.
 
     Returns
     -------
@@ -118,7 +118,7 @@ def fmt_dict(
             lines.append(f"#{str(idex).zfill(indent)} {key_temp(f'[{param_name}]').to_str()}{type_str}: {val}")
     result = "\n".join(lines)
     if display:
-        smart_print(result)
+        safe_print(result)
 
     return result
 
@@ -133,7 +133,7 @@ def fmt_list(target: Sequence[Any], /, display: bool = True) -> str:
             The target list to be formatted.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using :func:`smart_print()`.
+            Whether to print the formatted output to the terminal using :func:`safe_print()`.
 
     Returns
     -------
@@ -147,6 +147,6 @@ def fmt_list(target: Sequence[Any], /, display: bool = True) -> str:
             lines.append(f"#{str(idex).zfill(indent)} {item}")
     result = "\n".join(lines)
     if display:
-        smart_print(result)
+        safe_print(result)
 
     return result

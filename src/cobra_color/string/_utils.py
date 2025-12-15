@@ -69,14 +69,10 @@ def _fmt_ansicolor(
     c_code: Any = "",
     c_mode: Any = "",
 ) -> Tuple[Optional[str], Optional[str]]:
-    r"""
-    Format ANSI color code from an iterator of codes.
-    Return foreground and background color codes.
-    """
+    r"""Format ANSI color code from an iterator of codes.
+    Return foreground and background color codes."""
     def _fmt_args(code: str):
-        r"""
-        Format the arguments for ANSI color code.
-        """
+        r"""Format the arguments for ANSI color code."""
         mode = str(c_mode or next(code_iter, ""))
         if mode == "5":
             # 256 color
@@ -106,9 +102,7 @@ def _fmt_ansicolor(
 
 
 def _to_color_code(c: Any, /, is_fg: bool) -> Optional[str]:
-    r"""
-    Parse the color input into ANSI color code.
-    """
+    r"""Parse the color input into ANSI color code."""
     if isinstance(c, str):
         # Basic 8 color OR Light 8 color
         if c in __STANDARD_COLOR_MAP:  # "d"

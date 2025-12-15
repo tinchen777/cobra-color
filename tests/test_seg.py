@@ -1,4 +1,4 @@
-# tests/test_ctext.py
+# tests/test_cstr.py
 
 import sys
 sys.path.append("/data/tianzhen/my_packages/cobra-color/src")

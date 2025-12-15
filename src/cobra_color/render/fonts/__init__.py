@@ -1,6 +1,6 @@
-# src/cobra_color/draw/fonts/__init__.py
+# src/cobra_color/render/fonts/__init__.py
 """
-Module for font resources in draw of cobra-color.
+Module for font resources in render of :pkg:`cobra_color` package
 """
 
 from ._font_map import FontName

@@ -26,7 +26,7 @@ _GLOBAL_CONSOLE: Optional[Console] = None  # output function
 
 def set_console(func: Callable[..., Any], **kwargs: Any):
     r"""
-    Set a global console for smart_print function.
+    Set a global console for :func:`safe_print()`.
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ class Console():
         return self.__func(*args, **{**self.__kwargs, **kwargs})
 
 
-def smart_print(
+def safe_print(
     *values: object,
     sep: str = " ",
     end: str = "\n",
@@ -61,7 +61,7 @@ def smart_print(
     console: Optional[Union[Callable[..., Any], Console, Any]] = None
 ):
     r"""
-    A smart print function that works well with progress bars from :pkg:`tqdm` and :pkg:`rich` consoles.
+    A safe print function that works well with progress bars from :pkg:`tqdm` and :pkg:`rich` consoles.
 
     Parameters
     ----------
@@ -80,7 +80,7 @@ def smart_print(
         flush : bool, default to `False`
             Whether to forcibly flush the stream.
 
-        console_func : Optional[Union[Callable[..., Any], ConsoleFunc]], default to `None`
+        console : Optional[Union[Callable[..., Any], ConsoleFunc]], default to `None`
             A console output function or method to use for printing.
             - `None`: Use the global console if set;
             - `Callable[..., Any]` or :class:`ConsoleFunc`: Use the provided function.

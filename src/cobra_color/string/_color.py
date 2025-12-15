@@ -4,110 +4,104 @@
 
 from __future__ import annotations
 from functools import (cached_property, wraps)
-from typing import (Any, List, Tuple, Set, Optional, Sequence, Iterable, Literal, Union, final, overload)
+from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Union, final, overload)
 
 from ._extension import (ExtStr, to_ExtStr)
 from ._segment import (ColorSeg, ansi_to_segments)
 from ._utils import (wrap_exc, to_fgcode, to_bgcode, to_style_codes)
-from ..types import (T_ColorSpec, T_StyleName)
+from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
 
 
-def _to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
+def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
     r"""
-    Convert an object to :class:`ExtStr`, with default value if empty.
+    Convert a single object to :class:`ExtStr`, with default value if empty.
     """
-    plain = obj.plain if isinstance(obj, ColorStr) else to_ExtStr(obj)
-    if default is not None and len(plain) == 0:
-        return default.plain if isinstance(default, ColorStr) else to_ExtStr(default)
-    else:
-        return plain
+    plain = obj.plain if isinstance(obj, (ColorSeg, ColorStr)) else to_ExtStr(obj)
+    return to_plain(default) if default is not None and len(plain) == 0 else plain
 
 
-def _to_ColorStr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
+def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
     r"""
-    Convert an object to :class:`ColorStr`, with default value if empty.
+    Convert a single object to :class:`ColorStr`, with default value if empty.
     """
-    c_str = obj if isinstance(obj, ColorStr) else ColorStr.from_str(obj)
-    if default is not None and len(c_str) == 0:
-        return default if isinstance(default, ColorStr) else ColorStr.from_str(default)
+    if isinstance(obj, ColorStr):
+        c_str = obj
+    elif isinstance(obj, ColorSeg):
+        c_str = ColorStr(obj)
     else:
-        return c_str
+        c_str = ColorStr.from_str(obj)
+    return to_cstr(default) if default is not None and len(c_str) == 0 else c_str
 
 
-@overload
-def ctext(ansi: Any, /) -> ColorStr: ...
-
-
-@overload
-def ctext(
-    text: Any,
-    /,
-    fg: Optional[T_ColorSpec] = None,
-    bg: Optional[T_ColorSpec] = None,
-    styles: Optional[Iterable[T_StyleName]] = None
-) -> ColorStr: ...
-
-
-def ctext(
-    text: Any,
-    /,
-    fg: Optional[T_ColorSpec] = None,
-    bg: Optional[T_ColorSpec] = None,
-    styles: Optional[Iterable[T_StyleName]] = None
+def cstr(
+    *objects: Any,
+    fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+    bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+    styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
 ) -> ColorStr:
     r"""
     Generate an easy-to-use :class:`ColorStr` instance, `rich str`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
 
     Parameters
     ----------
-        text : Any
-            The text content or ANSI formatted text content.
+        *objects: Any
+            Objects concatenated in order to a new :class:`ColorStr` instance.
 
-        fg : Optional[ColorSpec], default to `None`
+            NOTE: `"\033["` in string will be treated as ANSI escape codes, other objects will automatically converted to :class:`ColorStr`.
+
+        fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
             The foreground color of the `rich str`.
-            - _ColorName_: `Basic 8 color` OR `Light 8 color`, compatible with older terminals;
+            - _ColorSpec_: A `single value`, the foreground color of the entire `rich str` to be applied. (Ref to :type:`T_ColorSpec`);
+            - `""` or `"clear"`: Clear foreground color for the entire `rich str`;
+            - `None`: No change to foreground color;
+            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the foreground color of the entire `rich str` will be replaced according to the mapping:
+            1. For each mapping _key_:
+            - _ColorSpec_: A `single value` to match. (Ref to :type:`T_ColorSpec`);
+            - `""`: Match segments without foreground color.
+            2. For each mapping _value_:
+            - _ColorSpec_: A `single value` to apply. (Ref to :type:`T_ColorSpec`);
+            - `""`: Remove the foreground color.
 
-            NOTE: _ColorName_: `"d"`(black); `"r"`(red); `"g"`(green); `"y"`(yellow); `"b"`(blue); `"m"`(magenta); `"c"`(cyan); `"w"`(white). Prefix `l` means Light 8 color.
-
-            - _int_: `256 color`, compatible with most terminals;
-
-            NOTE: `0-7`: Basic 8 color; `8-15`: Light 8 color; `16-231`: 6x6x6 color cube; `232-255`: grayscale from dark to light.
-
-            - _Iterable_: `True color`, compatible with modern terminals.
-
-            NOTE: Each value should be in range `0-255`, representing `R`, `G`, `B` respectively.
-
-            - `None`: No color applied.
-
-        bg : Optional[ColorSpec], default to `None`
+        bg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
             The background color of the `rich str`.
-            (Same format and rules as parameter :param:`fg`.)
+            (Ref to :param:`fg`)
 
-        styles : Optional[Iterable[StyleName]]], default to `None`
+        styles : Optional[Union[T_StyleDesc, Literal["clear"]]]
             The styles combination of the `rich str`.
+            - _StyleSpec_: A `single value`, the styles of the entire `rich str` to be applied. (Ref to :type:`T_StyleSpec`);
+            - `""` or `"clear"`: Clear styles for the entire `rich str`;
+            - `None`: No change to styles;
+            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the styles of the entire `rich str` will be replaced according to the mapping:
+            1. For each mapping _key_:
+            - _StyleSpec_: A `single value` to match. (Ref to :type:`T_StyleSpec`);
+            - `"all"`: Match any styles;
+            - `None`: No match, add new styles to the entire `rich str`.
+            2. For each mapping _value_:
+            - _StyleSpec_: A `single value` to apply. (Ref to :type:`T_StyleSpec`);
+            - `None`: Remove matched styles.
 
-            NOTE: _StyleName_: `"bold"`, `"dim"`, `"italic"`, `"udl"`, `"underline"`, `"blink"`, `"selected"`, `"disappear"`, `"del"`, `"delete"`.
+            NOTE: For styles mapping, the _key_ is a set of styles. If all styles in the _key_ are present in the segment, they will be replaced.
 
     Returns
     -------
         ColorStr
             A :class:`ColorStr` instance with the specified color and style.
+
+    Useages
+    --------
+    >>> # 1. Create a simple colored string.
+    >>> cstr("\x1b[4m下划线\x1b[0m")
+    >>> # 2. Create a colored string with foreground color, background color or styles.
+    >>> cstr("Hello World!", fg="r", styles=["bold", "udl"])
+    >>> # 3. Rebuild a colored string with mapping rules.
+    >>> cstr(c_str, fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
+    >>> # 4. Combine multiple objects into a colored string.
+    >>> cstr("a", c_str, 1243)
     """
-    return ColorStr.from_str(text, fg=fg, bg=bg, styles=styles)
-
-
-@overload
-def to_ansi(text: Any, /) -> ExtStr: ...
-
-
-@overload
-def to_ansi(
-    text: Any,
-    /,
-    fg: Optional[T_ColorSpec] = None,
-    bg: Optional[T_ColorSpec] = None,
-    styles: Optional[Iterable[T_StyleName]] = None
-) -> ExtStr: ...
+    c_str = ColorStr.from_iter(*objects)
+    if fg is not None or bg is not None or styles is not None:
+        c_str._update(fg=fg, bg=bg, styles=styles)
+    return c_str
 
 
 def to_ansi(
@@ -115,11 +109,11 @@ def to_ansi(
     /,
     fg: Optional[T_ColorSpec] = None,
     bg: Optional[T_ColorSpec] = None,
-    styles: Optional[Iterable[T_StyleName]] = None
+    styles: Optional[T_StyleSpec] = None
 ) -> ExtStr:
     r"""
     Convert an object to an ANSI formatted :class:`ExtStr` with specified color and style.
-    Parameter Reference: :func:`ctext()`
+    (Parameter ref to :func:`cstr()`)
 
     Returns
     -------
@@ -127,8 +121,8 @@ def to_ansi(
             An ANSI formatted :class:`ExtStr` instance.
     """
     if fg is None and bg is None and styles is None:
-        return _to_plain(text)
-    return ColorSeg.from_raw(_to_plain(text), fg=fg, bg=bg, styles=styles).to_str()
+        return to_plain(text)
+    return ColorSeg.from_raw(to_plain(text), fg=fg, bg=bg, styles=styles).to_str()
 
 
 @wrap_exc
@@ -149,7 +143,7 @@ def _extend_method(func):
         if width <= len(obj):
             return obj.copy()
         # fillchar
-        fillchar = _to_ColorStr(fillchar, " ")
+        fillchar = to_cstr(fillchar, " ")
         fillchar_len = len(fillchar)
 
         left_len, right_len = func(obj, width)
@@ -186,15 +180,31 @@ class ColorStr(ExtStr):
         /,
         fg: Optional[T_ColorSpec] = None,
         bg: Optional[T_ColorSpec] = None,
-        styles: Optional[Iterable[T_StyleName]] = None
+        styles: Optional[T_StyleSpec] = None
     ):
         r"""
-        Create a :class:`ColorStr` instance from an ANSI formatted string.
-        Parameter Reference: :func:`ctext()`
+        Create a :class:`ColorStr` instance from a single string.
+        (Parameter ref to :func:`cstr()`)
         """
         if fg is None and bg is None and styles is None:
-            return cls(*ansi_to_segments(_to_plain(str_)), copy=False)
-        return cls(ColorSeg.from_raw(_to_plain(str_), fg=fg, bg=bg, styles=styles), copy=False)
+            return cls(*ansi_to_segments(to_plain(str_)), copy=False)
+        return cls(ColorSeg.from_raw(to_plain(str_), fg=fg, bg=bg, styles=styles), copy=False)
+
+    @classmethod
+    def from_iter(cls, *objects: Any):
+        r"""
+        Create a :class:`ColorStr` instance from an iterable of objects.
+        (Parameter ref to :func:`cstr()`)
+        """
+        segments: List[ColorSeg] = []
+        for obj in objects:
+            if isinstance(obj, ColorSeg):
+                segments.append(obj)
+            elif isinstance(obj, ColorStr):
+                segments.extend(obj._SEGMENTS)
+            else:
+                segments.extend(ansi_to_segments(to_plain(obj)))
+        return cls(*segments)
 
     def __new__(cls, *segments: ColorSeg, copy: bool = True):
         r"""
@@ -205,6 +215,8 @@ class ColorStr(ExtStr):
             new_segments = [ColorSeg.empty()]
         else:
             # segments provided
+            if any(not isinstance(seg, ColorSeg) for seg in segments):
+                raise TypeError("All Arguments Of ColorStr() Must Be ColorSeg Instances, Try To Use `ColorStr.from_iter()` For Other Types.")
             new_segments = [segments[0].copy() if copy else segments[0]]
             new_segments[-1].set_istart(0)
             for seg in segments[1:]:
@@ -218,7 +230,7 @@ class ColorStr(ExtStr):
                         seg.set_istart(new_segments[-1].iend)
                         new_segments.append(seg)
 
-        plain = ExtStr.from_iter(seg.plain for seg in new_segments)
+        plain = ExtStr.from_iter(*(seg.plain for seg in new_segments))
         obj = super().__new__(cls, plain)
         obj._is_fg_colored = any(seg.isfgcolored for seg in new_segments)
         obj._is_bg_colored = any(seg.isbgcolored for seg in new_segments)
@@ -228,94 +240,48 @@ class ColorStr(ExtStr):
 
         return obj
 
-    def recolor(
+    def rebuild(
         self,
         apply_range: Optional[slice] = None,
         /,
-        fg: Optional[Union[Sequence[Tuple[Any, Any]], str]] = None,
-        bg: Optional[Union[Sequence[Tuple[Any, Any]], str]] = None,
-        styles: Optional[Union[Sequence[Tuple[Any, Any]], Set[str]]] = None
+        fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+        bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+        styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
         r"""
-        Recolor and restyle the :class:`ColorStr` according to the specified mapping rules.
+        Rebuild A new :class:`ColorStr` according to the specified mapping rules.
 
         Parameters
         ----------
             apply_range : Optional[slice], default to `None`
-                The range to which the recoloring and restyling will be applied.
+                The range to which the rebuild will be applied.
                 - `None`: Apply to the entire :class:`ColorStr`.
                 - `slice`: A slice object defining the range.
 
-            fg : Optional[Union[Sequence[Tuple[Any, Any]], str]], default to `None`
-                The `mapping pairs` or `single value` for foreground color replacement.
-                - `None`: No change.
-                - If a `single value` is provided, all segments' foreground color will be replaced with the specified value.
-                - If a sequence of `mapping pairs` is provided, each pair defines a mapping from _key_ to _value_.
-
-                For each mapping _key_:
-                - _ColorSpec_: Reference to :type:`ColorSpec`;
-                - `""`: Match segments without foreground color.
-
-                For each mapping _value_:
-                - _ColorSpec_: Reference to :type:`ColorSpec`;
-                - `""`: Remove the foreground color.
+            fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
+                (Ref to :param:`fg` in :func:`cstr()`)
 
             bg : Optional[Union[Sequence[Tuple[Any, Any]], str]], default to `None`
-                The `mapping pairs` or `single value` for background color replacement.
-                (Same format and rules as parameter :param:`fg`)
+                (Ref to :param:`bg` in :func:`cstr()`)
 
             styles : Optional[Union[Sequence[Tuple[Any, Any]], Set[str]]], default to `None`
-                The `mapping pairs` or `single value` for style replacement.
-                - `None`: No change.
-                - If a `single value` is provided, all segments' styles will be replaced with the specified styles.
-                - If a sequence of `mapping pairs` is provided, each pair defines a mapping from _key_ to _value_.
-
-                For each mapping _key_:
-                - `Set[StyleName]`: A set of styles to match;
-                - `"all"`: Match all segments;
-                - `None`: No match, add new styles to all segments.
-
-                For each mapping _value_:
-                - `Set[StyleName]`: A set of styles to apply;
-                - `None`: Remove matched styles.
-
-                NOTE: For style mapping, the key is a set of styles. If all styles in the key set are present in the segment, they will be replaced.
+                (Ref to :param:`styles` in :func:`cstr()`)
 
         Returns
         -------
             ColorStr
-                The recolored and restyled :class:`ColorStr`.
+                A new recolored and restyled :class:`ColorStr`.
         """
-        # foreground mapping
-        if fg is not None:
-            to_fg = lambda x: "" if x == "" else to_fgcode(x)
-            if isinstance(fg, Sequence) and not isinstance(fg, str):
-                fg = [(to_fg(k), to_fg(v)) for k, v in fg]
-            else:
-                fg = to_fg(fg)
-        # background mapping
-        if bg is not None:
-            to_bg = lambda x: "" if x == "" else to_bgcode(x)
-            if isinstance(bg, Sequence) and not isinstance(bg, str):
-                bg = [(to_bg(k), to_bg(v)) for k, v in bg]
-            else:
-                bg = to_bg(bg)
-        # styles mapping
-        if styles is not None:
-            to_style = lambda x: None if x is None else to_style_codes(x)
-            if isinstance(styles, Sequence) and not isinstance(styles, str):
-                styles = [(to_style(k), to_style(v)) for k, v in styles]
-            else:
-                styles = [("all", to_style(styles))]
-        # rebuild
         if apply_range is None:
-            apply_range = slice(0, len(self))
-        start, stop, _ = self._loc(apply_range)
-        sub_ = self[start: stop]
-        for seg in sub_._SEGMENTS:
-            seg._update(fg=fg, bg=bg, styles=styles)
+            start, stop = 0, len(self)
+        else:
+            start, stop, _ = self._loc(apply_range)
+        new_sub = self[start: stop]
+        new_sub._update(fg=fg, bg=bg, styles=styles)
 
-        return self.insert(start, sub_, overwrite=True)
+        if start == 0 and stop == len(self):
+            return new_sub
+        return self.insert(start, new_sub, overwrite=True)
 
     def pieces(self) -> List[ColorStr]:
         r"""
@@ -357,9 +323,9 @@ class ColorStr(ExtStr):
         Returns
         -------
             ColorStr
-                The colored string with the applied pattern.
+                A new colored string with the applied pattern.
         """
-        c_text = _to_ColorStr(text)
+        c_text = to_cstr(text)
         # text length
         text_len = len(c_text)
         if text_len == 0:
@@ -481,7 +447,7 @@ class ColorStr(ExtStr):
             if not first:
                 segments.extend(self._SEGMENTS)
             first = False
-            segments.extend(_to_ColorStr(item)._SEGMENTS)
+            segments.extend(to_cstr(item)._SEGMENTS)
         return ColorStr(*segments)
 
     def split(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
@@ -551,7 +517,7 @@ class ColorStr(ExtStr):
         return self.partition(sep, _reverse=True)
 
     def replace(self, old: Any, new: Any, /, count: Any = -1) -> ColorStr:
-        return _to_ColorStr(new).join(self.split(old, maxsplit=count))
+        return to_cstr(new).join(self.split(old, maxsplit=count))
 
     def insert(
         self,
@@ -581,10 +547,10 @@ class ColorStr(ExtStr):
         Returns
         -------
             ColorStr
-                The new :class:`ColorStr` with the substring inserted.
+                A new :class:`ColorStr` with the substring inserted.
         """
         index = self._loc(index)
-        sub_ = _to_ColorStr(sub)
+        sub_ = to_cstr(sub)
         if not keep_pattern:
             if overwrite:
                 sub_ = self.apply(sub_, start_idx=-index)
@@ -676,6 +642,54 @@ class ColorStr(ExtStr):
         """
         return ColorStr(*self._SEGMENTS)
 
+    def _update(
+        self,
+        fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+        bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
+        styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
+    ):
+        r"""Update the color and style mapping of the :class:`ColorStr` in place.
+        (Ref to :func:`ColorStr.rebuild()`)"""
+
+        def _fmt_c_mapping(m: Any, func: Any, /):
+            r"""Format the color mapping input."""
+            if m is None:
+                return
+            elif m == "clear":
+                return ""
+            elif isinstance(m, Sequence) and not isinstance(m, str):
+                tuple_m = [i for i in m if (isinstance(i, (Tuple, List)) and len(i) >= 2)]
+                if tuple_m:
+                    return [(func(i[0]), func(i[1])) for i in tuple_m]
+            return func(m)
+
+        def _fmt_s_mapping(m: Any, func: Any, /) -> Optional[List[Any]]:
+            r"""Format the style mapping input."""
+            if m is None:
+                return
+            elif m == "clear":
+                return [("all", None)]
+            elif isinstance(m, Sequence) and not isinstance(m, str):
+                if not m:
+                    return [("all", None)]
+                tuple_m = [i for i in m if (isinstance(i, (Tuple, List)) and len(i) >= 2)]
+                if tuple_m:
+                    return [(func(i[0]), func(i[1])) for i in tuple_m]
+            return [("all", func(m))]
+
+        # foreground mapping
+        _fg = _fmt_c_mapping(fg, lambda x: "" if x == "" else to_fgcode(x))
+        # background mapping
+        _bg = _fmt_c_mapping(bg, lambda x: "" if x == "" else to_bgcode(x))
+        # styles mapping
+        _styles = _fmt_s_mapping(styles, lambda x: None if x is None else to_style_codes(x))
+        print("fg:", _fg, "bg:", _bg, "styles:", _styles)
+        # update
+        for seg in self._SEGMENTS:
+            seg._update(fg=_fg, bg=_bg, styles=_styles)
+        # clear cached rich
+        self.__dict__.pop("rich", None)
+
     @overload
     def _loc(self, s: slice, /) -> Tuple[int, int, int]: ...
 
@@ -708,7 +722,7 @@ class ColorStr(ExtStr):
         return self.apply(text)
 
     def __add__(self, other: Any, /):
-        return ColorStr(*(self._SEGMENTS + _to_ColorStr(other)._SEGMENTS))
+        return ColorStr(*(self._SEGMENTS + to_cstr(other)._SEGMENTS))
 
     def __mul__(self, n: Any, /):
         assert isinstance(n, int), "Can Only Multiply ColorStr By An Integer."
@@ -788,4 +802,4 @@ class ColorStr(ExtStr):
         r"""
         The rich text with colors and styles.
         """
-        return ExtStr.from_iter(seg.to_str() for seg in self._SEGMENTS)
+        return ExtStr.from_iter(*(seg.to_str() for seg in self._SEGMENTS))

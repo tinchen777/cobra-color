@@ -3,12 +3,12 @@
 # @TianZhen
 
 from __future__ import annotations
-from typing import (Optional, Iterable, List, Any)
+from typing import (Optional, List, Any)
 
 
 def to_ExtStr(obj: Any, /) -> ExtStr:
     r"""
-    Convert an object to :class:`ExtStr`.
+    Convert an object to :class:`ExtStr`, direct conversion of `non-ExtStr` type.
     """
     return obj if isinstance(obj, ExtStr) else ExtStr(obj)
 
@@ -22,14 +22,11 @@ class ExtStr(str):
     _is_styled: bool = False
 
     @classmethod
-    def from_iter(cls, strings: Iterable[str], /):
+    def from_iter(cls, *objects: Any):
         r"""
-        Create an :class:`ExtStr` instance from an iterable of strings.
+        Create an :class:`ExtStr` instance from an iterable of objects.
         """
-        try:
-            return cls("".join(strings))
-        except TypeError:
-            raise TypeError("Create ExtStr From Iterable Of Strings Failed.")
+        return cls("".join(map(to_ExtStr, objects)))
 
     def __init__(self, *args, **kwargs):
         self._is_plain = not (self.isfgcolored or self.isbgcolored or self.isstyled)

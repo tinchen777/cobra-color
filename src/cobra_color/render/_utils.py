@@ -8,7 +8,7 @@ import numpy as np
 from typing import (Tuple, List, Union, Iterable)
 
 from ..string import to_ansi
-from ..output import smart_print
+from ..output import safe_print
 from ..types import T_ImgFillingMode
 
 
@@ -32,13 +32,13 @@ def image_to_ansi(
 
         mode : ImgFillingModeName, default to `"half-color"`
             The rendering mode.
-            See :func:`imgfile_to_ansi()` for details.
+            (Ref to :func:`imgfile_to_ansi()`)
 
         charset : str, default to `"@%#*+=-:. "`
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using :func:`smart_print()`.
+            Whether to print the rendered string to the terminal using :func:`safe_print()`.
 
     Returns
     -------
@@ -108,7 +108,7 @@ def image_to_ansi(
 
     output_str = "\n".join(out_lines)
     if display:
-        smart_print(output_str)
+        safe_print(output_str)
 
     return output_str
 

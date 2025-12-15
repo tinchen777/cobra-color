@@ -15,22 +15,27 @@ from ._utils import (
     to_style_codes
 )
 from ._extension import (to_ExtStr, ExtStr)
-from ..types import (T_ColorSpec, T_ColorTrans, T_StyleName, T_StyleModTarget, T_StyleTrans)
+from ..types import (T_ColorSpec, T_ColorTrans, T_StyleTrans, T_StyleSpec)
 
 
-def ansi_to_segments(ansi: str, /):
+def ansi_to_segments(ansi: str, /) -> List[ColorSeg]:
     r"""
     Parse an ANSI formatted string into a list of :class:`ColorSeg` segments.
     """
-    segments: List[ColorSeg] = []
-    last_idx = 0
     cur_fg = cur_bg = ""
-    cur_styles: Set[str] = set()
+    cur_styles = set()
+    if not (isinstance(ansi, str) and ansi):
+        return []
+    if "\x1b[" not in ansi:
+        return [ColorSeg(ansi, cur_fg, cur_bg, cur_styles)]
+
+    new_segments: List[ColorSeg] = []
+    last_idx = 0
     for m in __ANSI_RE.finditer(ansi):
         start, end = m.span()
         # text before ANSI code
         if start > last_idx:
-            segments.append(ColorSeg(ansi[last_idx: start], cur_fg, cur_bg, cur_styles))
+            new_segments.append(ColorSeg(ansi[last_idx: start], cur_fg, cur_bg, cur_styles))
         # ANSI code
         code_iter = iter(m.group(1).split(';'))  # e.g.: "1;31;44"
         for code in code_iter:
@@ -47,9 +52,9 @@ def ansi_to_segments(ansi: str, /):
                 cur_bg = bg or cur_bg
         last_idx = end
     if last_idx < len(ansi):
-        segments.append(ColorSeg(ansi[last_idx:], cur_fg, cur_bg, cur_styles))
+        new_segments.append(ColorSeg(ansi[last_idx:], cur_fg, cur_bg, cur_styles))
 
-    return segments
+    return new_segments
 
 
 @final
@@ -66,7 +71,7 @@ class ColorSeg:
         /,
         fg: Optional[T_ColorSpec] = None,
         bg: Optional[T_ColorSpec] = None,
-        styles: Optional[Iterable[T_StyleName]] = None
+        styles: Optional[T_StyleSpec] = None
     ):
         r"""
         Create a :class:`ColorSeg` instance from a string with specified color and style.
@@ -245,9 +250,7 @@ class ColorSeg:
         return self.assemble("fg", "bg", "styles")
 
     def _update_plain(self, target: Any, /, mode: Literal["=", "+="] = "="):
-        r"""
-        Modify the plain string of the :class:`ColorSeg` instance.
-        """
+        r"""Modify the plain string of the :class:`ColorSeg` instance."""
         if target is not None:
             if mode == "=":
                 self._plain = to_ExtStr(target)
@@ -257,45 +260,39 @@ class ColorSeg:
                 raise ValueError(f"Invalid Mode For ColorSeg._update_plain(), Got {mode}.")
 
     def _update_fg(self, target: Optional[str], to: Optional[str], /):
-        r"""
-        Replace the foreground color of the :class:`ColorSeg` instance.
-        """
-        if target is not None and to is not None and self.fg == target:
+        r"""Update the foreground color of the :class:`ColorSeg` instance."""
+        if to is not None and self.fg == target:
             self._fg_code = to
 
     def _update_bg(self, target: Optional[str], to: Optional[str], /):
-        r"""
-        Replace the background color of the :class:`ColorSeg` instance.
-        """
-        if target is not None and to is not None and self.bg == target:
+        r"""Update the background color of the :class:`ColorSeg` instance."""
+        if to is not None and self.bg == target:
             self._bg_code = to
 
     def _update_styles(
         self,
-        target: Optional[T_StyleModTarget],
+        target: Optional[Union[Set[str], Literal["all"]]],
         to: Optional[Set[str]],
         /
     ):
-        r"""
-        Modify the styles of the :class:`ColorSeg` instance.
-        """
+        r"""Update the styles of the :class:`ColorSeg` instance."""
         if target == "all":
             # modify all styles
-            if to is None:
+            if to is None:  # "all", None
                 # remove all styles
                 self._style_codes.clear()
-            elif to:
+            elif to:  # "all", {1}
                 # replace all styles with new styles
                 self._style_codes = set(to)
-        elif target is None and to:
+        elif target is None and to:  # None, {1}
             # add new styles
             self._style_codes.update(to)
         elif target and target.issubset(self._style_codes):
             # modify specified styles
-            if to is None:
+            if to is None:  # {2}, None
                 # remove target styles
                 self._style_codes.difference_update(target)
-            elif to:
+            elif to:  # {2}, {1}
                 # replace target styles with new styles
                 self._style_codes.difference_update(target)
                 self._style_codes.update(to)
@@ -306,24 +303,20 @@ class ColorSeg:
         bg: Optional[Union[Sequence[T_ColorTrans], str]] = None,
         styles: Optional[Sequence[T_StyleTrans]] = None
     ):
-        r"""
-        Update the :class:`ColorSeg` instance with new color and style attributes.
-        """
+        r"""Update the color and style of the :class:`ColorSeg` instance."""
         try:
             # foreground
-            if fg is not None:
-                if isinstance(fg, str):
-                    self._fg_code = fg
-                elif isinstance(fg, Sequence):
-                    for fg_target, fg_to in fg:
-                        self._update_fg(fg_target, fg_to)
+            if isinstance(fg, str):
+                self._fg_code = fg
+            elif isinstance(fg, Sequence):
+                for fg_target, fg_to in fg:
+                    self._update_fg(fg_target, fg_to)
             # background
-            if bg is not None:
-                if isinstance(bg, str):
-                    self._bg_code = bg
-                elif isinstance(bg, Sequence):
-                    for bg_target, bg_to in bg:
-                        self._update_bg(bg_target, bg_to)
+            if isinstance(bg, str):
+                self._bg_code = bg
+            elif isinstance(bg, Sequence):
+                for bg_target, bg_to in bg:
+                    self._update_bg(bg_target, bg_to)
             # styles
             if styles is not None:
                 for style_target, style_to in styles:
@@ -332,18 +325,16 @@ class ColorSeg:
             raise ValueError("ColorSeg._update() Error.")
 
     def __call__(self, text: Any, /) -> ColorSeg:
-        r"""
-        Apply the color and style of the :class:`ColorSeg` instance to a new string.
-        """
+        r"""Apply the color and style of the :class:`ColorSeg` instance to a new string."""
         return self.apply(text)
 
     def __repr__(self) -> str:
         return f"Seg(plain={repr(self.plain)},fg={repr(self.fg)},bg={repr(self.bg)},styles={repr(self.styles)}) @ [{self.istart},{self.iend})"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: Any, /) -> bool:
         return self.isequal(other)
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: Any, /) -> bool:
         return not self.__eq__(other)
 
     def __len__(self) -> int:
@@ -352,7 +343,7 @@ class ColorSeg:
     def __deepcopy__(self, memo) -> ColorSeg:
         return self.copy()
 
-    def __mod__(self, args: Any) -> ColorSeg:
+    def __mod__(self, args: Any, /) -> ColorSeg:
         r"""
         Create a new :class:`ColorSeg` instance with modified attributes.
 
