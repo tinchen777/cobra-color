@@ -4,17 +4,17 @@
 
 from __future__ import annotations
 from functools import (cached_property, wraps)
-from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Union, final, overload)
+from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Union, final)
 
 from ._extension import (ExtStr, to_ExtStr)
 from ._segment import (ColorSeg, ansi_to_segments)
-from ._utils import (wrap_exc, to_fgcode, to_bgcode, to_style_codes)
+from ._utils import (wrap_exc, to_fgcode, to_bgcode, to_style_codes, loc)
 from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
 
 
 def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
     r"""
-    Convert a single object to :class:`ExtStr`, with default value if empty.
+    Convert a single object to **`Extended String`**, with default value if empty.
     Minimize copying.
     """
     plain = obj.plain if isinstance(obj, (ColorSeg, ColorStr)) else to_ExtStr(obj)
@@ -23,7 +23,7 @@ def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
 
 def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
     r"""
-    Convert a single object to :class:`ColorStr`, with default value if empty.
+    Convert a single object to **`Color String`**, with default value if empty.
     Minimize copying.
     """
     if isinstance(obj, ColorStr):
@@ -37,8 +37,7 @@ def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
 
 def to_segments(obj: Any, /) -> List[ColorSeg]:
     r"""
-    Convert a single object to a list of :class:`ColorSeg` segments.
-    Minimize copying.
+    Convert a single object to a list of **`Segment`** with minimize copying.
     """
     if isinstance(obj, ColorSeg):
         return [obj]
@@ -56,21 +55,21 @@ def cstr(
     sep: Any = ""
 ) -> ColorStr:
     r"""
-    Generate an easy-to-use :class:`ColorStr` instance, `rich str`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
+    Generate an easy-to-use **`{Color String}`** with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
 
     Parameters
     ----------
         *objects: Any
-            Objects concatenated in order to a new :class:`ColorStr` instance.
+            Objects concatenated in order to a new **`Color String`**.
 
-            NOTE: `"\033["` in string will be treated as ANSI escape codes, other objects will automatically converted to :class:`ColorStr`.
+            NOTE: `"\033["` in string will be treated as ANSI escape codes, other objects will automatically converted to **`Color String`**.
 
         fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
-            The foreground color of the `rich str`.
-            - _ColorSpec_: A `single value`, the foreground color of the entire `rich str` to be applied. (Ref to :type:`T_ColorSpec`);
-            - `""` or `"clear"`: Clear foreground color for the entire `rich str`;
+            The foreground color of the **`Color String`**.
+            - _ColorSpec_: A `single value`, the foreground color of the entire **`Color String`** to be applied. (Ref to :type:`T_ColorSpec`);
+            - `""` or `"clear"`: Clear foreground color for the entire **`Color String`**;
             - `None`: No change to foreground color;
-            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the foreground color of the entire `rich str` will be replaced according to the mapping:
+            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the foreground color of the entire **`Color String`** will be replaced according to the mapping:
             1. For each mapping _key_:
             - _ColorSpec_: A `single value` to match. (Ref to :type:`T_ColorSpec`);
             - `""`: Match segments without foreground color.
@@ -79,19 +78,19 @@ def cstr(
             - `""`: Remove the foreground color.
 
         bg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
-            The background color of the `rich str`.
+            The background color of the **`Color String`**.
             (Ref to :param:`fg`)
 
         styles : Optional[Union[T_StyleDesc, Literal["clear"]]]
-            The styles combination of the `rich str`.
-            - _StyleSpec_: A `single value`, the styles of the entire `rich str` to be applied. (Ref to :type:`T_StyleSpec`);
-            - `""` or `"clear"`: Clear styles for the entire `rich str`;
+            The styles combination of the **`Color String`**.
+            - _StyleSpec_: A `single value`, the styles of the entire **`Color String`** to be applied. (Ref to :type:`T_StyleSpec`);
+            - `""` or `"clear"`: Clear styles for the entire **`Color String`**;
             - `None`: No change to styles;
-            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the styles of the entire `rich str` will be replaced according to the mapping:
+            - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the styles of the entire **`Color String`** will be replaced according to the mapping:
             1. For each mapping _key_:
             - _StyleSpec_: A `single value` to match. (Ref to :type:`T_StyleSpec`);
             - `"all"`: Match any styles;
-            - `None`: No match, add new styles to the entire `rich str`.
+            - `None`: No match, add new styles to the entire **`Color String`**.
             2. For each mapping _value_:
             - _StyleSpec_: A `single value` to apply. (Ref to :type:`T_StyleSpec`);
             - `None`: Remove matched styles.
@@ -104,7 +103,7 @@ def cstr(
     Returns
     -------
         ColorStr
-            A :class:`ColorStr` instance with the specified color and style.
+            A new **`Color String`** with the specified pattern.
 
     Useages
     --------
@@ -124,24 +123,24 @@ def cstr(
 
 
 def to_ansi(
-    text: Any,
+    object: Any,
     /,
     fg: Optional[T_ColorSpec] = None,
     bg: Optional[T_ColorSpec] = None,
     styles: Optional[T_StyleSpec] = None
 ) -> ExtStr:
     r"""
-    Convert an object to an ANSI formatted :class:`ExtStr` with specified color and style.
+    Convert an object to an ANSI formatted **`Extended String`** with specified pattern.
     (Parameter ref to :func:`cstr()`)
 
     Returns
     -------
         ExtStr
-            An ANSI formatted :class:`ExtStr` instance.
+            An ANSI formatted **`Extended String`**.
     """
     if fg is None and bg is None and styles is None:
-        return to_plain(text)
-    return ColorSeg.from_raw(to_plain(text), fg=fg, bg=bg, styles=styles).to_str()
+        return to_plain(object)
+    return ColorSeg.from_raw(to_plain(object), fg=fg, bg=bg, styles=styles).to_ansi()
 
 
 @wrap_exc
@@ -187,7 +186,7 @@ def _clip_method(func):
 @final
 class ColorStr(ExtStr):
     r"""
-    An easy-to-use `rich str` with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
+    A class of **`{Color String}`** that extends :class:`ExtStr`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
     """
     _SEGMENTS: List[ColorSeg]
     _plain: ExtStr
@@ -202,7 +201,7 @@ class ColorStr(ExtStr):
         styles: Optional[T_StyleSpec] = None
     ):
         r"""
-        Create a :class:`ColorStr` instance from a single string.
+        Create a **`Color String`** from a single string.
         (Parameter ref to :func:`cstr()`)
         """
         if fg is None and bg is None and styles is None:
@@ -212,7 +211,7 @@ class ColorStr(ExtStr):
     @classmethod
     def from_iter(cls, *objects: Any, sep: Any = ""):
         r"""
-        Create a :class:`ColorStr` instance from an iterable of objects.
+        Create a **`Color String`** from an iterable of objects.
         (Parameter ref to :func:`cstr()`)
         """
         sep_segments = to_segments(sep)
@@ -227,7 +226,7 @@ class ColorStr(ExtStr):
 
     def __new__(cls, *segments: ColorSeg, copy: bool = True):
         r"""
-        Create a :class:`ColorStr` instance from :class:`ColorSeg` instances.
+        Create a **`Color String`** from some **`Segment`**.
         """
         if len(segments) == 0:
             # no segments provided
@@ -240,7 +239,7 @@ class ColorStr(ExtStr):
             new_segments[-1].set_istart(0)
             for seg in segments[1:]:
                 if seg.plain:
-                    if seg.isequal(new_segments[-1], ("fg", "bg", "styles")):
+                    if seg.equal(new_segments[-1], flags=("fg", "bg", "styles")):
                         # merge with last segment
                         new_segments[-1]._update_plain(seg.plain, mode="+=")
                     else:
@@ -266,14 +265,14 @@ class ColorStr(ExtStr):
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
         r"""
-        Rebuild A new :class:`ColorStr` according to the specified mapping rules.
+        Rebuild A new **`Color String`** according to the specified mapping rules.
 
         Parameters
         ----------
             apply_range : Optional[slice], default to `None`
-                The range to which the rebuild will be applied.
-                - `None`: Apply to the entire :class:`ColorStr`.
-                - `slice`: A slice object defining the range.
+                The range to where the mapping rules will be applied.
+                - `None`: Apply to the entire **`Color String`**.
+                - _slice_: Apply to the specified slice range, ignore step.
 
             fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
                 (Ref to :param:`fg` in :func:`cstr()`)
@@ -287,12 +286,9 @@ class ColorStr(ExtStr):
         Returns
         -------
             ColorStr
-                A new recolored and restyled :class:`ColorStr`.
+                A new recolored and restyled **`Color String`**.
         """
-        if apply_range is None:
-            start, stop = 0, len(self)
-        else:
-            start, stop, _ = self._loc(apply_range)
+        start, stop = loc(len(self), apply_range)[:2]
         new_sub = self[start: stop]
         new_sub._update(fg=fg, bg=bg, styles=styles)
 
@@ -302,12 +298,12 @@ class ColorStr(ExtStr):
 
     def pieces(self) -> List[ColorStr]:
         r"""
-        Segmented into :class:`ColorStr` pieces according to segments.
+        Get the list of **`Color String`** pieces from the segments.
 
         Returns
         -------
             List[ColorStr]
-                A list of :class:`ColorStr` pieces.
+                A list of **`Color String`** pieces.
         """
         return [ColorStr(seg) for seg in self._SEGMENTS]
 
@@ -315,32 +311,32 @@ class ColorStr(ExtStr):
         self,
         text: Any,
         /,
-        _from_left: bool = True,
         start_idx: int = 0,
-        extend: Optional[Literal["left", "right", "all"]] = None
+        extend: Optional[Literal["left", "right", "all"]] = None,
+        _from_left: bool = True
     ) -> ColorStr:
         r"""
-        Apply the color and style pattern of this :class:`ColorStr` to another :class:`str` from the `left`.
+        Apply the pattern of the **`Color String`** to another object from the `left`.
 
         Parameters
         ----------
             text : Any
-                The text content to which the color and style pattern will be applied.
+                The text content to which the pattern will be applied.
 
             start_idx : int, default to `0`
-                The starting index from `left` in the text where the pattern will be applied.
+                The starting index from `left` in the :param:`text` where the pattern will be applied.
 
             extend : Optional[Literal["left", "right", "all"]], default to `None`
-                How to extend the pattern when the text is longer than the pattern.
-                - `"left"`: Extend the leftmost segment of the pattern to the left.
-                - `"right"`: Extend the rightmost segment of the pattern to the right.
+                How to extend the pattern when the :param:`text` is longer than the pattern.
+                - `"left"`: Extend the leftmost pattern to the left.
+                - `"right"`: Extend the rightmost pattern to the right.
                 - `"all"`: Extend both sides.
                 - `None`: No extension.
 
         Returns
         -------
             ColorStr
-                A new colored string with the applied pattern.
+                A new **`Color String`** with the applied pattern.
         """
         c_text = to_cstr(text)
         # text length
@@ -392,9 +388,8 @@ class ColorStr(ExtStr):
         extend: Optional[Literal["left", "right", "all"]] = None
     ) -> ColorStr:
         r"""
-        Apply the color and style pattern of this :class:`ColorStr` to another :class:`str` from the `right`.
-
-        Parameter Reference: :func:`apply()`
+        Apply the pattern of the **`Color String`** to another object from the `right`.
+        (Parameter ref to :func:`ColorStr.apply()`)
         """
         return self.apply(text, start_idx=start_idx, extend=extend, _from_left=False)
 
@@ -404,26 +399,44 @@ class ColorStr(ExtStr):
         start: int = 0,
         end: Optional[int] = None,
         /,
-        maxsplit: int = -1,
+        limit: int = -1,
         _reverse: bool = False
     ) -> List[int]:
         r"""
-        Find all occurrences of a substring in the :class:`ColorStr`.
+        Find all occurrences of a substring in the **`Color String`** from the `left`.
+
+        NOTE: The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
+
+        Parameters
+        ----------
+            sub : str
+                The substring to search for.
+
+            start : int, default to `0`
+                The starting index applied to the search.
+
+            end : Optional[int], default to `None`
+                The ending index applied to the search.
+
+            limit : int, default to `-1`
+                The maximum number of occurrences to find, by default -1 (no limit).
+
+        Returns
+        -------
+            List[int]
+                A list of starting indices where the substring is found.
         """
-        if isinstance(sub, ColorStr) and not sub.isplain:
+        if isinstance(sub, ColorStr):
             # for ColorStr
-            if _reverse:
-                all_indices = self.plain.rfindall(sub.plain, start, end)
-                all_indices.reverse()
-            else:
-                all_indices = self.plain.findall(sub.plain, start, end)
             indices: List[int] = []
             count = 0
-            for start_idx in all_indices:
-                if sub == self[start_idx: start_idx + len(sub)]:
+            if limit == 0:
+                return indices
+            for start_idx in self.plain._search(sub.plain, start, end, reverse=_reverse):
+                if self.startswith(sub, start_idx):
                     indices.append(start_idx)
                     count += 1
-                    if maxsplit != -1 and count >= maxsplit:
+                    if 0 < limit <= count:
                         break
             if _reverse:
                 indices.reverse()
@@ -431,9 +444,8 @@ class ColorStr(ExtStr):
         else:
             # for non-ColorStr
             if _reverse:
-                return self.plain.rfindall(sub, start, end, maxsplit=maxsplit)
-            else:
-                return self.plain.findall(sub, start, end, maxsplit=maxsplit)
+                return self.plain.rfindall(sub, start, end, limit=limit)
+            return self.plain.findall(sub, start, end, limit=limit)
 
     def rfindall(
         self,
@@ -441,71 +453,52 @@ class ColorStr(ExtStr):
         start: int = 0,
         end: Optional[int] = None,
         /,
-        maxsplit: int = -1
+        limit: int = -1
     ) -> List[int]:
         r"""
-        Find all occurrences of a substring in the :class:`ColorStr` in reverse order.
+        Find all occurrences of a substring in the **`Color String`** from the `right`.
+        (Parameter ref to :func:`ColorStr.findall()`)
+
+        NOTE: The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
         """
-        return self.findall(sub, start, end, maxsplit=maxsplit, _reverse=True)
+        return self.findall(sub, start, end, limit=limit, _reverse=True)
 
     def find(self, sub: Any, /, start: int = 0, end: Optional[int] = None) -> int:  # type: ignore
-        idx_list = self.findall(sub, start, end, maxsplit=1)
+        idx_list = self.findall(sub, start, end, limit=1)
         return idx_list[0] if idx_list else -1
 
     def rfind(self, sub: Any, /, start: int = 0, end: Optional[int] = None) -> int:  # type: ignore
-        idx_list = self.rfindall(sub, start, end, maxsplit=1)
+        idx_list = self.rfindall(sub, start, end, limit=1)
         return idx_list[0] if idx_list else -1
 
     def join(self, iterable: Iterable[Any], /) -> ColorStr:
         return ColorStr.from_iter(*iterable, sep=self)
 
-    def split(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
+    def split(self, sep: Any = " ", /, maxsplit: int = -1, _reverse: bool = False) -> List[ColorStr]:  # type: ignore
         sep_ = to_ExtStr(sep)
         new_subs: List[ColorStr] = []
-        count = 0
         start_idx = 0
-        end_idx = -1
-        while maxsplit == -1 or count < maxsplit:
-            end_idx = self.find(sep_, start_idx)
-            if end_idx == -1:
-                break
-            # segment
+        for end_idx in self.findall(sep_, limit=maxsplit, _reverse=_reverse):
             new_subs.append(self[start_idx: end_idx])
-            # update
             start_idx = end_idx + len(sep_)
-            count += 1
-        # last segment
         new_subs.append(self[start_idx:])
 
         return new_subs
 
     def rsplit(self, sep: Any = " ", /, maxsplit: int = -1) -> List[ColorStr]:  # type: ignore
-        sep_ = to_ExtStr(sep)
-        new_subs: List[ColorStr] = []
-        count = 0
-        end_idx = len(self)
-        start_idx = -1
-        while maxsplit == -1 or count < maxsplit:
-            start_idx = self.rfind(sep_, 0, end_idx)
-            if start_idx == -1:
-                break
-            # segment
-            new_subs.append(self[start_idx + len(sep_): end_idx])
-            # update
-            end_idx = start_idx
-            count += 1
-        # last segment
-        new_subs.append(self[0: end_idx])
-        new_subs.reverse()
-
-        return new_subs
+        return self.split(sep, maxsplit=maxsplit, _reverse=True)
 
     def splitlines(self, keepends: bool = False) -> List[ColorStr]:  # type: ignore[misc]
-        new_subs = self.split("\n")
         if keepends:
-            for i in range(len(new_subs) - 1):
-                new_subs[i] += "\n"
-        return new_subs
+            new_subs: List[ColorStr] = []
+            start_idx = 0
+            for idx in self.findall("\n"):
+                end_idx = idx + 1
+                new_subs.append(self[start_idx: end_idx])
+                start_idx = end_idx
+            new_subs.append(self[start_idx:])
+            return new_subs
+        return self.split("\n")
 
     def partition(self, sep: Any, /, _reverse: bool = False) -> Tuple[ColorStr, ColorStr, ColorStr]:  # type: ignore
         sep_ = to_ExtStr(sep)
@@ -537,7 +530,7 @@ class ColorStr(ExtStr):
         keep_pattern: bool = True
     ) -> ColorStr:
         r"""
-        Insert a substring into the :class:`ColorStr` at the specified index.
+        Insert a substring into the **`Color String`** at the specified index.
 
         Parameters
         ----------
@@ -556,9 +549,9 @@ class ColorStr(ExtStr):
         Returns
         -------
             ColorStr
-                A new :class:`ColorStr` with the substring inserted.
+                A new **`Color String`** with the substring inserted.
         """
-        index = self._loc(index)
+        index = loc(len(self), index)
         sub_ = to_cstr(sub)
         if not keep_pattern:
             if overwrite:
@@ -630,13 +623,13 @@ class ColorStr(ExtStr):
         return self.rjust(width, "0", extend=extend)
 
     @_clip_method
-    def strip(self, chars: str | None = None, /) -> ColorStr: ...
+    def strip(self, chars: Optional[str] = None, /) -> ColorStr: ...
 
     @_clip_method
-    def lstrip(self, chars: str | None = None, /) -> ColorStr: ...
+    def lstrip(self, chars: Optional[str] = None, /) -> ColorStr: ...
 
     @_clip_method
-    def rstrip(self, chars: str | None = None, /) -> ColorStr: ...
+    def rstrip(self, chars: Optional[str] = None, /) -> ColorStr: ...
 
     @_clip_method
     def removeprefix(self, prefix: str, /) -> ColorStr: ...
@@ -644,9 +637,88 @@ class ColorStr(ExtStr):
     @_clip_method
     def removesuffix(self, suffix: str, /) -> ColorStr: ...
 
+    def startswith(  # type: ignore
+        self,
+        prefix: Union[Any, Tuple[Any, ...]],
+        start: int = 0,
+        end: Optional[int] = None,
+        /
+    ) -> bool:
+        for prefix_ in ((prefix,) if isinstance(prefix, str) else prefix):
+            prefix_ = to_ExtStr(prefix_)
+            offset_len = start + len(prefix_)
+            end_ = offset_len if end is None else min(offset_len, end)
+            if self.equal(prefix_, slice(start, end_)):
+                return True
+        return False
+
+    def endswith(  # type: ignore
+        self,
+        suffix: Union[Any, Tuple[Any, ...]],
+        start: int = 0,
+        end: Optional[int] = None,
+        /
+    ) -> bool:
+        for suffix_ in ((suffix,) if isinstance(suffix, str) else suffix):
+            suffix_ = to_ExtStr(suffix_)
+            end_ = len(self) if end is None else end
+            start_ = max(end_ - len(suffix_), start)
+            if self.equal(suffix_, slice(start_, end_)):
+                return True
+        return False
+
+    def equal(self, other: Any, at: Optional[slice] = None, /) -> bool:
+        r"""
+        Check if the **`Color String`** is equal to another object at the specified range.
+
+        Parameters
+        ----------
+            other : Any
+                The other object to compare with.
+
+            at : Optional[slice], default to `None`
+                The slice object specifying the range to compare.
+
+        Returns
+        -------
+            bool
+        """
+        if not isinstance(other, str):
+            return False
+
+        other_ = to_ExtStr(other)
+        start, stop = loc(len(self), at)[:2]
+        if len(other_) != stop - start:
+            # length not equal
+            return False
+        if start == stop:
+            # both empty
+            return True
+        if self.isplain and other_.isplain:
+            # self isplain, other isplain
+            return super().startswith(other_.plain, start)
+        if not self.isplain:
+            # self not isplain, other is ColorStr
+            other_segments = to_segments(other_)
+            seg_idx = 0
+            for seg in self._SEGMENTS:
+                if start >= seg.iend:
+                    continue
+                if stop <= seg.istart:
+                    break
+                if seg.equal(
+                    other_segments[seg_idx],
+                    slice(max(seg.istart, start), min(stop, seg.iend))
+                ):
+                    seg_idx += 1
+                else:
+                    return False
+            return True
+        return False
+
     def copy(self):
         r"""
-        Create a copy of the :class:`ColorStr`.
+        Create a copy of the **`Color String`**.
         """
         return ColorStr(*self._SEGMENTS)
 
@@ -656,10 +728,10 @@ class ColorStr(ExtStr):
         bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
-        r"""Update the color and style mapping of the :class:`ColorStr` in place.
+        r"""Update the pattern mapping of the **`Color String`** in place.
         (Ref to :func:`ColorStr.rebuild()`)
 
-        NOTE: Adjacent segments with the same pattern in the updated :class:`ColorStr` will not be automatically merged."""
+        NOTE: Adjacent segments with the same pattern in the updated **`Color String`** will not be automatically merged."""
 
         def _fmt_c_mapping(m: Any, func: Any, /):
             r"""Format the color mapping input."""
@@ -701,39 +773,11 @@ class ColorStr(ExtStr):
         # clear cached rich
         self.__dict__.pop("rich", None)
 
-    @overload
-    def _loc(self, s: slice, /) -> Tuple[int, int, int]: ...
-
-    @overload
-    def _loc(self, idx: int, /) -> int: ...
-
-    @overload
-    def _loc(self, start: int, end: int, /) -> Tuple[int, int]: ...
-
-    def _loc(self, start: Union[slice, int], end: Optional[int] = None, /):
-        r"""
-        Get the valid start and end indices for slicing.
-        """
-        # slice
-        if isinstance(start, slice):
-            start_idx, end_idx, step = start.indices(len(self))
-            return start_idx, end_idx, step
-        # single index
-        if end is None:
-            if start < 0:
-                start += len(self)
-            if start < 0 or start >= len(self):
-                raise IndexError(f"Index {start} Of ColorStr Out Range [-{len(self)}, {len(self)}).")
-            return start
-        # slice indices
-        start_idx, end_idx, _ = slice(start, end).indices(len(self))
-        return start_idx, end_idx
-
     def __call__(self, text: Any, /) -> ColorStr:
         return self.apply(text)
 
     def __add__(self, other: Any, /):
-        return ColorStr(*(self._SEGMENTS + to_cstr(other)._SEGMENTS))
+        return ColorStr(*self._SEGMENTS, *to_cstr(other)._SEGMENTS)
 
     def __mul__(self, n: Any, /):
         assert isinstance(n, int), "Can Only Multiply ColorStr By An Integer."
@@ -742,15 +786,7 @@ class ColorStr(ExtStr):
         return ColorStr(*[seg for _ in range(n) for seg in self._SEGMENTS])
 
     def __eq__(self, value: Any, /):
-        if isinstance(value, str):
-            val = to_ExtStr(value)
-            if self.isplain and val.isplain:
-                # self isplain, value isplain
-                return super().__eq__(value)
-            elif not self.isplain and not val.isplain and isinstance(val, ColorStr):
-                # self iscolored, value iscolored
-                return self._SEGMENTS == val._SEGMENTS
-        return False
+        return self.equal(value)
 
     def __ne__(self, value: Any, /):
         return not self.__eq__(value)
@@ -764,21 +800,22 @@ class ColorStr(ExtStr):
 
     def __getitem__(self, key: Any, /):
         if isinstance(key, slice):
-            start, stop, step = self._loc(key)
+            start, stop, step = loc(len(self), key)
             if step != 1:
                 return ColorStr.from_str(super().__getitem__(key))
             # slice segments for non-step slices
             new_segments: List[ColorSeg] = []
             for seg in self._SEGMENTS:
-                if start >= seg.iend or stop <= seg.istart:
+                if start >= seg.iend:
                     continue
+                if stop <= seg.istart:
+                    break
                 left_idx = max(seg.istart, start)
                 right_idx = min(stop, seg.iend)
-                if left_idx <= right_idx:
-                    new_segments.append(seg(self.plain[left_idx: right_idx]))
+                new_segments.append(seg(self.plain[left_idx: right_idx]))
             return ColorStr(*new_segments, copy=False)
         elif isinstance(key, int):
-            key = self._loc(key)
+            key = loc(len(self), key)
             # find segment
             for seg in self._SEGMENTS:
                 if seg.istart <= key < seg.iend:
@@ -797,20 +834,20 @@ class ColorStr(ExtStr):
     @property
     def iscombined(self) -> bool:
         r"""
-        Check if the :class:`ColorStr` is combined from multiple segments.
+        Check if the **`Color String`** is combined from multiple segments.
         """
         return len(self._SEGMENTS) > 1
 
     @property
     def plain(self) -> ExtStr:
         r"""
-        The plain :class:`ExtStr` string without any color or style.
+        The string of  **`Color String`** without any pattern.
         """
         return self._plain
 
     @cached_property
     def rich(self) -> ExtStr:
         r"""
-        The rich text with colors and styles.
+        The string of **`Color String`** with pattern.
         """
-        return ExtStr.from_iter(*(seg.to_str() for seg in self._SEGMENTS))
+        return ExtStr.from_iter(*(seg.to_ansi() for seg in self._SEGMENTS))

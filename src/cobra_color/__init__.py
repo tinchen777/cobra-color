@@ -67,7 +67,7 @@ from .output import (safe_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 __all__ = [
     "cstr",

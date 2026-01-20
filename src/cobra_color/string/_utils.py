@@ -4,19 +4,7 @@
 
 from functools import wraps
 import re
-from typing import (Optional, Sequence, Iterable, Iterator, Tuple, Set, Any)
-
-
-def wrap_exc(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            args_repr = ", ".join(repr(a) for a in args)
-            kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
-            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}.")
-    return wrapper
+from typing import (Union, Literal, Optional, Sequence, Iterable, Iterator, Tuple, Set, Any, overload)
 
 
 # --------------- ANSI Code Utils ---------------
@@ -156,3 +144,73 @@ def to_style_codes(styles: Any, /) -> Set[str]:
             return result
         return {__STYLE_MAP[s] for s in style_codes if s in __STYLE_MAP}
     return set()
+
+
+# --------------- Other Utils ---------------
+def to_str(obj: Any, /) -> str:
+    r"""
+    Convert a single object to :class:`str` with minimize copying.
+    """
+    return obj if isinstance(obj, str) else str(obj)
+
+
+@overload
+def loc(len_: int, none: None, _none: None = None, /, offset: int = 0) -> Tuple[Literal[0], int]: ...
+
+
+@overload
+def loc(len_: int, s: slice, _none: None = None, /, offset: int = 0) -> Tuple[int, int, int]: ...
+
+
+@overload
+def loc(len_: int, idx: int, _none: None = None, /, offset: int = 0) -> int: ...
+
+
+@overload
+def loc(len_: int, start: int, end: int, /, offset: int = 0) -> Tuple[int, int]: ...
+
+
+def loc(len_: int, a_: Optional[Union[slice, int]], b_: Optional[int] = None, /, offset: int = 0):
+    r"""
+    Locate the indices in a string of given length with an optional :param:`offset`.
+    """
+    offset = max(offset, 0)  # ensure non-negative offset
+    # all
+    if a_ is None:
+        return 0, len_
+    # slice
+    if isinstance(a_, slice):
+        return slice(
+            a_.start if a_.start is None or a_.start < 0 else max(a_.start - offset, 0),
+            a_.stop if a_.stop is None or a_.stop < 0 else max(a_.stop - offset, 0),
+            a_.step
+        ).indices(len_)
+    # single index
+    if b_ is None:
+        low_b = offset  # lower bound
+        up_b = len_ + offset  # upper bound
+        if low_b <= a_ < up_b:
+            return a_ - offset
+        if -len_ <= a_ < 0:
+            return a_ + len_
+        raise IndexError(f"Index {a_} Out Range [-{len_}, 0) Or [{low_b}, {up_b}).")
+    # slice indices
+    return slice(
+        a_ if a_ < 0 else max(a_ - offset, 0),
+        b_ if b_ < 0 else max(b_ - offset, 0)
+    ).indices(len_)[:2]
+
+
+def wrap_exc(func):
+    r"""
+    A decorator to wrap exceptions with function call details.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            args_repr = ", ".join(repr(a) for a in args)
+            kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
+            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}.")
+    return wrapper

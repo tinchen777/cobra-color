@@ -64,10 +64,10 @@ def fmt_dict(
         class_name = str(target.__class__.__name__)
         father_classes = [father_class.__name__ for father_class in target.__class__.__bases__]
         legend = '  '.join([
-            _STYLES["key_param"]("[param]").to_str(),
-            _STYLES["key_protected"]("[_param]").to_str(),
-            _STYLES["key_class_private"](f"[_{class_name}__param]").to_str(),
-            _STYLES["key_inherited_private"](f"[_{father_classes[0]}__param]").to_str()
+            _STYLES["key_param"]("[param]").to_ansi(),
+            _STYLES["key_protected"]("[_param]").to_ansi(),
+            _STYLES["key_class_private"](f"[_{class_name}__param]").to_ansi(),
+            _STYLES["key_inherited_private"](f"[_{father_classes[0]}__param]").to_ansi()
         ])
         target = target.__dict__
     elif not isinstance(target, Mapping):
@@ -79,14 +79,14 @@ def fmt_dict(
         indent = len(str(len(target)))
         # title
         if title:
-            lines.append((" " * (indent + 2)) + _STYLES["title"](f"< {title} >").to_str())
+            lines.append((" " * (indent + 2)) + _STYLES["title"](f"< {title} >").to_ansi())
         # legend
         if legend:
             lines.append((" " * (indent + 2)) + legend)
         # content
         for idex, (key, val) in enumerate(target.items(), start=1):
             key = str(key)
-            type_str = _STYLES["type"](type(val).__name__).to_str()
+            type_str = _STYLES["type"](type(val).__name__).to_ansi()
             if class_name:
                 # class attributes
                 if key.startswith("_"):
@@ -113,9 +113,9 @@ def fmt_dict(
                 key_temp = _STYLES["key"]
             # omit items
             if param_name in omits and val:
-                val = _STYLES["placeholder"]("PLACEHOLDER").to_str()
+                val = _STYLES["placeholder"]("PLACEHOLDER").to_ansi()
 
-            lines.append(f"#{str(idex).zfill(indent)} {key_temp(f'[{param_name}]').to_str()}{type_str}: {val}")
+            lines.append(f"#{str(idex).zfill(indent)} {key_temp(f'[{param_name}]').to_ansi()}{type_str}: {val}")
     result = "\n".join(lines)
     if display:
         safe_print(result)

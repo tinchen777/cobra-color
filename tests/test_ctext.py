@@ -37,7 +37,55 @@ def test_ColorStr():
     print(a)
     print(a._SEGMENTS)
     print(a[3:10])
-    print(a._loc(-22))
+
+    print("true", cstr("2") == "2")
+    print("false", cstr("2", bg="b") == cstr("2"))
+    print("false", cstr("2", bg="b") == "2")
+    print("true", cstr("2", bg="b") == cstr("2", bg="b"))
+    print("false", "2" == cstr("2", bg="r"))
+    print("false", "2" == 1)
+    print("====")
+    print("true", cstr("2", bg="b") != "2")
+    print("false", cstr("2") != cstr("2"))
+    print("false", "2" != cstr("2"))
+    print("====")
+    t = a + "1b5" + a
+    print(t)
+    t1 = t[3: 6]
+    print(t1)
+    print("true", t.equal(t1, slice(3, 6)))
+    print("false", t.equal(t1.plain, slice(3, 6)))
+    print("false", cstr().equal(t1, slice(1, 1)))
+    print("true", cstr().equal(t1[1:1], slice(1, 1)))
+    print("====")
+    t2 = t[22: 25]
+    print(t2)
+    print("true", t.equal("1b5", slice(22, 25)))
+    t3 = t[3:25]
+    print(t3)
+    t4 = t[3:4]
+    print(t4)
+    print("false", t.equal(t4, slice(3, 25)))
+    print("==== startswith")
+    print("true", t.startswith(t1, 3))
+    print("false", t.startswith(t1.plain, 3))
+    print("false", cstr().startswith(t1, 1))
+    print("true", cstr().startswith(t1[1:1], 1))
+    print("====")
+    t2 = t[22: 25]
+    print(t2)
+    print("false", t.startswith("1b5", 22, 24))
+    t3 = t[3:25]
+    print(t3)
+    t4 = t[14:15]
+    print(t4)
+    print("true", t.startswith((t4, "123"), 14))
+    print("====endswith")
+    print("true", t.endswith(t1, 0, 6))
+    print("false", t.endswith(t1.plain, 3))
+    print("false", cstr().endswith(t1, 1))
+    print("true", cstr().endswith(t1[1:1], 1))
+    print("true", t.endswith((t4, "1b5"), 14, 25))
 
     print(a.apply("modified"*3, start_idx=3, extend="left"))
     print(a.rapply("modified"*3, start_idx=3, extend=None))
@@ -68,7 +116,8 @@ def test_ColorStr():
     print(a[:5].pieces()[-1])
     print(a)
     print(a._SEGMENTS)
-    print("===================")
+    print("=================== SPLIT")
+    print(a)
 
     for seg in a.split(cstr("b", fg="r", styles=["italic", "delete"])):
         print(seg, end="     ")
@@ -76,7 +125,32 @@ def test_ColorStr():
     print(a.plain.split("b"))
     print(a.split(cstr("b", fg="y")))
     print(a.rsplit(cstr("b", fg="y"), maxsplit=1))
+    print(a.split("b"))
     print(a.splitlines(keepends=True))
+    
+    
+    aa = ColorStr.from_str("abcd", bg="lm", styles={"bold", "udl"})
+    aa += cstr("123b4ff\n", fg="r", styles={"italic", "delete"})
+    aa *= 2
+    ga = cstr("a", aa, 1243, sep=cstr("sep", fg="y"))
+  
+    for i in ga.split(cstr(1)):
+        print(i, end="  ")
+    print()
+    print("-------------------")
+    for i in ga.split("1", 2):
+        print(i, end="  ")
+    print()
+    print("-------------------")
+    
+    for i in ga.rsplit("1", 2):
+        print(i, end="  ")
+    print()
+    print("------------------- rsplit")
+    for i in ga.splitlines(keepends=True):
+        print(i, end="  ")
+    print()
+    print("------------------- splitlines")
 
     print(a.replace(cstr("b", bg="lm", styles=["bold", "udl"]), cstr("BB", fg="y"), count=1))
 
@@ -85,7 +159,9 @@ def test_ColorStr():
     print(a.removesuffix("4ff"))
     print(a.removeprefix("abcd1"))
 
+    print("------------------- partition")
     print(a.partition(cstr("fab")))
+    print(a.partition("fab"))
     print(a.rpartition("fab1"))
 
     print(a.splitlines())
@@ -101,15 +177,7 @@ def test_ColorStr():
         print(i, end="|")
     print()
     print("fs" in a)
-    print(cstr("2") == "2")
-    print(cstr("2", bg="b") == cstr("2"))
-    print(cstr("2", bg="b") == cstr("2", bg="b"))
-    print("2" == cstr("2", bg="r"))
-    print("2" == 1)
-    print("====")
-    print(cstr("2", bg="b") != "2")
-    print(cstr("2") != cstr("2"))
-    print("2" != cstr("2"))
+    
 
     print("====")
     a += "999"
@@ -135,11 +203,11 @@ def test_ColorStr():
     print(f)
     print(f.pieces())
     # print("\x1b[4m下划线")
-    f = cstr(f, a, "\x1b[4m下划线", 434, fg=[("", "g")])
+    f = cstr(f, a, "<\x1b[4m下划线", 434, fg=[("", "g")])
     print(f)
     print(f._SEGMENTS)
 
-    f._update(fg=[("b", "y")], styles=["1"])
+    f._update(fg=[("b", "y")], styles={"dim"})
 
     print(f)
     print(f._SEGMENTS)
@@ -148,7 +216,10 @@ def test_ColorStr():
     print(f)
     print(f._SEGMENTS)
 
-    print(cstr("a", a, 1243, sep=cstr("sep", fg="y")))
+    g = cstr("a", a, 1243, sep=cstr("sep", fg="y"))
+    print(g)
+    print(g.replace(1, cstr("ONE", fg="g")))
+    print(g.replace(cstr(1), cstr("ONE", fg="g")))
 
 
 if __name__ == "__main__":
