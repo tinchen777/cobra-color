@@ -74,7 +74,10 @@ class ExtStr(str):
     ) -> List[int]:
         r"""
         Find all occurrences of a substring in the **`Extended String`** from the `right`.
-        (Parameter ref to :func:`ExtStr.findall()`)
+
+        Notes
+        -----
+        - All parameters follow the usage conventions of :meth:`ExtStr.findall`.
         """
         indices = list(self._search(to_str(sub), start, end, limit, True))
         indices.reverse()

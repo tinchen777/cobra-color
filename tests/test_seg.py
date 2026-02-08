@@ -44,7 +44,7 @@ def test_ColorSeg():
 
     print("====")
 
-    f = f % {"+plain": "123", "+fg": "ly", "@fg": ("lr", "m"), "@bg": "44", "-bg": "m", "-styles": ["bold"], "+styles": ["dim"], "@styles": ["dim", "blink"]}
+    f = f % {"+plain": "123", "+fg": "ly", "@fg": ("lr"), "@bg": "44", "-bg": "m", "-styles": ["bold"], "+styles": ["dim"], "@styles": ["dim", "blink"]}
     print(f)
     print(f.to_ansi())
     f._update_plain("modified again", mode="=")

@@ -6,8 +6,8 @@ Formatting utilities for for :pkg:`cobra_color` package.
 
 Functions
 ---------
-- :func:`fmt_dict()`: Format and display a dictionary or object's attributes in a structured manner.
-- :func:`fmt_list()`: Format and display a list in a structured manner.
+- :func:`fmt_dict`: Format and display a dictionary or object's attributes in a structured manner.
+- :func:`fmt_list`: Format and display a list in a structured manner.
 """
 
 from typing import (Any, Mapping, Sequence, List)
@@ -50,7 +50,7 @@ def fmt_dict(
             An optional title to be displayed at the top of the formatted output.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using :func:`safe_print()`.
+            Whether to print the formatted output to the terminal using :func:`safe_print`.
 
     Returns
     -------
@@ -133,7 +133,7 @@ def fmt_list(target: Sequence[Any], /, display: bool = True) -> str:
             The target list to be formatted.
 
         display : bool, default to `True`
-            Whether to print the formatted output to the terminal using :func:`safe_print()`.
+            Whether to print the formatted output to the terminal using :func:`safe_print`.
 
     Returns
     -------

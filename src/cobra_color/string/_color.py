@@ -66,33 +66,33 @@ def cstr(
 
         fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
             The foreground color of the **`Color String`**.
-            - _ColorSpec_: A `single value`, the foreground color of the entire **`Color String`** to be applied. (Ref to :type:`T_ColorSpec`);
+            - _ColorSpec_: A `single value`, the foreground color of the entire **`Color String`** to be applied. See also :type:`T_ColorSpec`;
             - `""` or `"clear"`: Clear foreground color for the entire **`Color String`**;
             - `None`: No change to foreground color;
             - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the foreground color of the entire **`Color String`** will be replaced according to the mapping:
             1. For each mapping _key_:
-            - _ColorSpec_: A `single value` to match. (Ref to :type:`T_ColorSpec`);
+            - _ColorSpec_: A `single value` to match. See also :type:`T_ColorSpec`;
             - `""`: Match segments without foreground color.
             2. For each mapping _value_:
-            - _ColorSpec_: A `single value` to apply. (Ref to :type:`T_ColorSpec`);
+            - _ColorSpec_: A `single value` to apply. See also :type:`T_ColorSpec`;
             - `""`: Remove the foreground color.
 
         bg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
             The background color of the **`Color String`**.
-            (Ref to :param:`fg`)
+            Usage is similar to :param:`fg`.
 
         styles : Optional[Union[T_StyleDesc, Literal["clear"]]]
             The styles combination of the **`Color String`**.
-            - _StyleSpec_: A `single value`, the styles of the entire **`Color String`** to be applied. (Ref to :type:`T_StyleSpec`);
+            - _StyleSpec_: A `single value`, the styles of the entire **`Color String`** to be applied. See also :type:`T_StyleSpec`;
             - `""` or `"clear"`: Clear styles for the entire **`Color String`**;
             - `None`: No change to styles;
             - _Seq(Tuple(Any, Any))_: A sequence of `mapping pairs`, each pair defines a mapping from _key_ to _value_, the styles of the entire **`Color String`** will be replaced according to the mapping:
             1. For each mapping _key_:
-            - _StyleSpec_: A `single value` to match. (Ref to :type:`T_StyleSpec`);
+            - _StyleSpec_: A `single value` to match. See also :type:`T_StyleSpec`;
             - `"all"`: Match any styles;
             - `None`: No match, add new styles to the entire **`Color String`**.
             2. For each mapping _value_:
-            - _StyleSpec_: A `single value` to apply. (Ref to :type:`T_StyleSpec`);
+            - _StyleSpec_: A `single value` to apply. See also :type:`T_StyleSpec`;
             - `None`: Remove matched styles.
 
             NOTE: For styles mapping, the _key_ is a set of styles. If all styles in the _key_ are present in the segment, they will be replaced.
@@ -131,12 +131,15 @@ def to_ansi(
 ) -> ExtStr:
     r"""
     Convert an object to an ANSI formatted **`Extended String`** with specified pattern.
-    (Parameter ref to :func:`cstr()`)
 
     Returns
     -------
         ExtStr
             An ANSI formatted **`Extended String`**.
+
+    Notes
+    -----
+    - All parameters follow the usage conventions of :func:`cstr`.
     """
     if fg is None and bg is None and styles is None:
         return to_plain(object)
@@ -202,7 +205,10 @@ class ColorStr(ExtStr):
     ):
         r"""
         Create a **`Color String`** from a single string.
-        (Parameter ref to :func:`cstr()`)
+
+        Notes
+        -----
+        - All parameters follow the usage conventions of :func:`cstr`.
         """
         if fg is None and bg is None and styles is None:
             return cls(*ansi_to_segments(to_plain(str_)), copy=False)
@@ -212,7 +218,10 @@ class ColorStr(ExtStr):
     def from_iter(cls, *objects: Any, sep: Any = ""):
         r"""
         Create a **`Color String`** from an iterable of objects.
-        (Parameter ref to :func:`cstr()`)
+
+        Notes
+        -----
+        - All parameters follow the usage conventions of :func:`cstr`.
         """
         sep_segments = to_segments(sep)
         first = True
@@ -275,13 +284,13 @@ class ColorStr(ExtStr):
                 - _slice_: Apply to the specified slice range, ignore step.
 
             fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
-                (Ref to :param:`fg` in :func:`cstr()`)
+                Usage is similar to :param:`fg` in :func:`cstr`.
 
             bg : Optional[Union[Sequence[Tuple[Any, Any]], str]], default to `None`
-                (Ref to :param:`bg` in :func:`cstr()`)
+                Usage is similar to :param:`bg` in :func:`cstr`.
 
             styles : Optional[Union[Sequence[Tuple[Any, Any]], Set[str]]], default to `None`
-                (Ref to :param:`styles` in :func:`cstr()`)
+                Usage is similar to :param:`styles` in :func:`cstr`.
 
         Returns
         -------
@@ -389,7 +398,10 @@ class ColorStr(ExtStr):
     ) -> ColorStr:
         r"""
         Apply the pattern of the **`Color String`** to another object from the `right`.
-        (Parameter ref to :func:`ColorStr.apply()`)
+
+        Notes
+        -----
+        - All parameters follow the usage conventions of :meth:`ColorStr.apply`.
         """
         return self.apply(text, start_idx=start_idx, extend=extend, _from_left=False)
 
@@ -404,8 +416,6 @@ class ColorStr(ExtStr):
     ) -> List[int]:
         r"""
         Find all occurrences of a substring in the **`Color String`** from the `left`.
-
-        NOTE: The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
 
         Parameters
         ----------
@@ -425,6 +435,10 @@ class ColorStr(ExtStr):
         -------
             List[int]
                 A list of starting indices where the substring is found.
+
+        Notes
+        -----
+        - The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
         """
         if isinstance(sub, ColorStr):
             # for ColorStr
@@ -457,9 +471,11 @@ class ColorStr(ExtStr):
     ) -> List[int]:
         r"""
         Find all occurrences of a substring in the **`Color String`** from the `right`.
-        (Parameter ref to :func:`ColorStr.findall()`)
 
-        NOTE: The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
+        Notes
+        -----
+        - All parameters follow the usage conventions of :meth:`ColorStr.findall`;
+        - The pattern in **`Color String`** is NOT considered during the search, if :param:`sub` is not a **`Color String`**.
         """
         return self.findall(sub, start, end, limit=limit, _reverse=True)
 
@@ -729,9 +745,11 @@ class ColorStr(ExtStr):
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
         r"""Update the pattern mapping of the **`Color String`** in place.
-        (Ref to :func:`ColorStr.rebuild()`)
 
-        NOTE: Adjacent segments with the same pattern in the updated **`Color String`** will not be automatically merged."""
+        Notes
+        -----
+        - All parameters follow the usage conventions of :meth:`ColorStr.rebuild`;
+        - Adjacent segments with the same pattern in the updated **`Color String`** will not be automatically merged."""
 
         def _fmt_c_mapping(m: Any, func: Any, /):
             r"""Format the color mapping input."""

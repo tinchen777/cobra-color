@@ -26,7 +26,7 @@ _GLOBAL_CONSOLE: Optional[Console] = None  # output function
 
 def set_console(func: Callable[..., Any], **kwargs: Any):
     r"""
-    Set a global console for :func:`safe_print()`.
+    Set a global console for :func:`safe_print`.
 
     Parameters
     ----------

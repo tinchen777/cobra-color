@@ -4,11 +4,11 @@ String utilities for :pkg:`cobra_color` package.
 
 Functions
 ---------
-- :func:`cstr()`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.
-- :func:`to_ansi()`: Convert an object to an ANSI formatted :class:`ExtStr`.
-- :func:`to_plain()`: Convert an object to a plain :class:`str`.
-- :func:`to_cstr()`: Convert an object to a :class:`ColorStr`.
-- :func:`ansi_to_segments()`: Parse an ANSI formatted string into a list of :class:`ColorSeg` segments.
+- :func:`cstr`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`to_ansi`: Convert an object to an ANSI formatted :class:`ExtStr`.
+- :func:`to_plain`: Convert an object to a plain :class:`str`.
+- :func:`to_cstr`: Convert an object to a :class:`ColorStr`.
+- :func:`ansi_to_segments`: Parse an ANSI formatted string into a list of :class:`ColorSeg` segments.
 Classes
 -------
 - :class:`ColorStr`: An easy-to-use `rich str` class with perfect support for :class:`str`.

@@ -128,7 +128,7 @@ class ColorSeg:
                 The other object to compare with.
 
             at : Optional[slice], default to `None`
-                `slice()` for the **`Segment`**, avoid creating new string via `slice()`.
+                :func:`slice` for the **`Segment`**, avoid creating new string via :func:`slice`.
                 Only used when comparing the `plain` attribute.
 
             real_index : bool, default to `False`
@@ -346,13 +346,29 @@ class ColorSeg:
 
     def __mod__(self, args: Any, /) -> ColorSeg:
         r"""
-        Create a new **`Segment`** with modified attributes based on the provided arguments.
+        Create a new **`Segment`** with modified attributes based on the provided mapping rules.
 
         Parameters
         ----------
-            args : Tuple or Dict
-                - _Tuple_: The position of elements should be: `(plain, fg, bg, styles, start)`;
-                - _Mapping_: The keys can be any of `"start"`, `"plain"`, `"fg"`, `"bg"`, `"styles"`, `"+fg"`, `"-fg"`, `"+bg"`, `"-bg"`, `"+styles"`, `"-styles"`.
+            args : Union[Tuple, Dict]
+                The mapping rules for modification, can be either a tuple or a dictionary.
+                - _Tuple_: The position of elements needs to be aligned with: `(plain, fg, bg, styles, start)` to generate mapping rules;
+                - _Dict_: Modifications to each part of the defined mapping rules will be made in the order given by the following rules.
+
+                The key of mapping rules can be any of the following, and the value is the corresponding target or mapping rules for modification:
+                - `"start"`: The relative start index for the new **`Segment`**.
+                1. plain
+                - `"plain"`: The new plain string to replace the original one;
+                - `"+plain"`: The new plain string to be appended to the original one.
+                2. foreground color
+                - `"fg"`: PRIORITY & EXCLUSIVITY. The new foreground color code to replace the original one;
+                - `"@fg"`: The new foreground color code to replace the original one if the original foreground color code matches the specified target;
+                - `"-fg"`: The new foreground color code to be removed if the original foreground color code matches the specified target;
+                - `"+fg"`: The new foreground color code to be added if the original foreground color code matches the specified target.
+                3. background color. Usage is similar to `foreground color`.
+                - `"bg"`, `"@bg"`, `"-bg"`, `"+bg"`.
+                4. styles. Usage is similar to `foreground color`
+                - `"styles"`, `"@styles"`, `"-styles"`, `"+styles"`, where the value should be a set of style codes or the string `"all"` to indicate all styles.
         """
         if isinstance(args, Tuple):
             args = dict(zip(("plain", "fg", "bg", "styles", "start"), args))
@@ -380,7 +396,7 @@ class ColorSeg:
                         seg._update_fg(to_fgcode(val[0]), to_fgcode(val[1]))
                     else:
                         warnings.warn(
-                            f"Invalid Value For Key '@fg' In ColorSeg.__mod__(), Got `@fg`: {val!r}.",
+                            f"Key '@fg' in mapping rules for Segment creation must be a sequence of two color specifications (target and replacement), got {val!r}. This rule will be ignored.",
                             category=UserWarning,
                             stacklevel=2
                         )
@@ -395,7 +411,7 @@ class ColorSeg:
                         seg._update_bg(to_bgcode(val[0]), to_bgcode(val[1]))
                     else:
                         warnings.warn(
-                            f"Invalid Value For Key '@bg' In ColorSeg.__mod__(), Got `@bg`: {val!r}.",
+                            f"Key '@bg' in mapping rules for Segment creation must be a sequence of two color specifications (target and replacement), got {val!r}. This rule will be ignored.",
                             category=UserWarning,
                             stacklevel=2
                         )
@@ -410,7 +426,7 @@ class ColorSeg:
                         seg._update_styles(to_style_codes(val[0]), to_style_codes(val[1]))
                     else:
                         warnings.warn(
-                            f"Invalid Value For Key '@styles' In ColorSeg.__mod__(), Got `@styles`: {val!r}.",
+                            f"Key '@styles' in mapping rules for Segment creation must be a sequence of two style specifications (target and replacement), got {val!r}. This rule will be ignored.",
                             category=UserWarning,
                             stacklevel=2
                         )

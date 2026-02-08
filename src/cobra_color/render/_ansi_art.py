@@ -71,7 +71,7 @@ def imgfile_to_ansi(
             - `"half-gray"`: Render using half block characters in grayscale, combining two pixels vertically.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using :func:`safe_print()`.
+            Whether to print the rendered string to the terminal using :func:`safe_print`.
 
         charset : str, default to `"@%#*+=-:. "`
             Characters used for `"ascii"` representation, ordered from darkest to lightest.
@@ -178,7 +178,7 @@ def fonttext_to_ansi(
             Left top position to start drawing text on the image canvas.
 
         display : bool, default to `False`
-            Whether to print the rendered string to the terminal using :func:`safe_print()`.
+            Whether to print the rendered string to the terminal using :func:`safe_print`.
 
         charset : str, default to `" #"`
             Characters used for `"ascii"` representation. The first character represents the background, and the last character represents the foreground.

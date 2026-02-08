@@ -13,10 +13,10 @@ Modules
 - :mod:`cobra_color.output`: Output utilities for safe printing in the terminal.
 Functions
 ---------
-- :func:`cstr()`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.
-- :func:`to_ansi()`: Convert an object to an ANSI formatted :class:`ExtStr`.
-- :func:`safe_print()`: A safe print function that works well with progress bars from `tqdm` and `rich` consoles.
-- :func:`set_console_func()`: Set a global console for safe_print function.
+- :func:`cstr`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.
+- :func:`to_ansi`: Convert an object to an ANSI formatted :class:`ExtStr`.
+- :func:`safe_print`: A safe print function that works well with progress bars from `tqdm` and `rich` consoles.
+- :func:`set_console`: Set a global console for safe_print function.
 
 Examples
 --------
@@ -67,7 +67,7 @@ from .output import (safe_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 __all__ = [
     "cstr",
