@@ -193,7 +193,7 @@ def loc(len_: int, a_: Optional[Union[slice, int]], b_: Optional[int] = None, /,
             return a_ - offset
         if -len_ <= a_ < 0:
             return a_ + len_
-        raise IndexError(f"Index {a_} Out Range [-{len_}, 0) Or [{low_b}, {up_b}).")
+        raise IndexError(f"Index {a_} of `loc()` out of range [-{len_}, 0) or [{low_b}, {up_b}).")
     # slice indices
     return slice(
         a_ if a_ < 0 else max(a_ - offset, 0),
@@ -212,5 +212,5 @@ def wrap_exc(func):
         except Exception as e:
             args_repr = ", ".join(repr(a) for a in args)
             kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
-            raise e.__class__(f"Error When Calling {func.__module__}.{func.__name__}({args_repr}, {kwargs_repr}): {e}.")
+            raise e.__class__(f"Error when calling `{func.__module__}.{func.__name__}({args_repr}, {kwargs_repr})`.") from e
     return wrapper

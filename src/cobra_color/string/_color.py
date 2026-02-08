@@ -160,7 +160,7 @@ def _extend_method(func):
     def wrapper(obj: ColorStr, width, fillchar=" ", /, extend=None):
         # width
         if not isinstance(width, int):
-            raise TypeError(f"Param 'width' Of ColorStr.{func.__name__}() Must Be An Integer, Got {type(width)}.")
+            raise TypeError(f"`width` parameter of `ColorStr.{func.__name__}()` must be an integer, got {type(width)}.")
         if width <= len(obj):
             return obj.copy()
         # fillchar
@@ -243,7 +243,7 @@ class ColorStr(ExtStr):
         else:
             # segments provided
             if any(not isinstance(seg, ColorSeg) for seg in segments):
-                raise TypeError("All Arguments Of ColorStr() Must Be ColorSeg Instances, Try To Use `ColorStr.from_iter()` For Other Types.")
+                raise TypeError(f"All arguments of `ColorStr.__new__` must be `ColorSeg` instances. Use `ColorStr.from_iter()` for other types.")
             new_segments = [segments[0].copy() if copy else segments[0]]
             new_segments[-1].set_istart(0)
             for seg in segments[1:]:
@@ -354,7 +354,7 @@ class ColorStr(ExtStr):
             return c_text
         # check start_idx
         if not isinstance(start_idx, int):
-            raise TypeError(f"Param 'start_idx' Of ColorStr.apply() Must Be An Integer, Got {type(start_idx)}.")
+            raise TypeError(f"`start_idx` parameter of `ColorStr.apply()` must be an integer, got {type(start_idx)}.")
         # pattern
         src_str_len = len(self)
         if _from_left:
@@ -839,7 +839,7 @@ class ColorStr(ExtStr):
                 if seg.istart <= key < seg.iend:
                     return ColorStr(seg(self.plain[key]), copy=False)
             # should not reach here
-            raise IndexError(f"Can Not Match Index {key} In ColorStr Segments.")
+            raise IndexError(f"Can not match index {key} in segments of ColorStr.")
         else:
             return ColorStr.from_str(super().__getitem__(key))
 

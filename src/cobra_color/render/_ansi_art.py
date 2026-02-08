@@ -218,13 +218,13 @@ def fonttext_to_ansi(
         try:
             pil_font = ImageFont.truetype(font, size=font_size)
         except Exception:
-            raise ValueError(f"Param `font` Of fonttext_to_ansi() Load Font Error From File Path: {font!r}.")
+            raise ValueError(f"`fonttext_to_ansi()` failed to load font from path {font!r}")
 
     elif isinstance(font, FontName):
         with pkg_resources.path(fonts, font.value) as font_path:
             pil_font = ImageFont.truetype(str(font_path), size=font_size)
     else:
-        raise ValueError(f"Param `font` Of fonttext_to_ansi() Should Be FontName Enum Or Valid Font File Path, Got {font!r}.")
+        raise ValueError(f"`font` parameter of `fonttext_to_ansi()` must be FontName Enum or valid font file path, got {font!r}.")
 
     draw.text(left_top, text, font=pil_font, fill=255)
 

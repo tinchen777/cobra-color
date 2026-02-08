@@ -107,7 +107,7 @@ class ColorSeg:
             self._style_codes = set(style_codes)
             self._style_codes.discard("")
         except TypeError:
-            raise TypeError(f"Param `style_codes` Of ColorSeg Must Be An Iterable, Got {type(style_codes)}.")
+            raise TypeError(f"`style_codes` parameter of `ColorSeg.__init__()` must be an iterable, got {type(style_codes)}.")
         # init start index
         self._START_IDX = 0
 
@@ -258,7 +258,7 @@ class ColorSeg:
             elif mode == "+=":
                 self._plain += to_ExtStr(target)
             else:
-                raise ValueError(f"Invalid Mode For ColorSeg._update_plain(), Got {mode}.")
+                raise ValueError(f"`mode` parameter of `ColorSeg._update_plain()` must be either '=' for replacement or '+=' for appending, got {mode!r}.")
 
     def _update_fg(self, target: Optional[str], to: Optional[str], /):
         r"""Update the foreground color of the **`Segment`**."""
@@ -323,7 +323,7 @@ class ColorSeg:
                 for style_target, style_to in styles:
                     self._update_styles(style_target, style_to)
         except Exception:
-            raise ValueError("ColorSeg._update() Error.")
+            raise RuntimeError("`ColorSeg._update()` error.")
 
     def __call__(self, str_: Any, /) -> ColorSeg:
         r"""Apply the pattern of the **`Segment`** to a new string."""
@@ -373,7 +373,7 @@ class ColorSeg:
         if isinstance(args, Tuple):
             args = dict(zip(("plain", "fg", "bg", "styles", "start"), args))
         if not isinstance(args, Dict):
-            raise TypeError(f"Param `args` Of ColorSeg.__mod__() Must Be A Tuple Or A Dict, Got {type(args)}.")
+            raise TypeError(f"`args` parameter of `ColorSeg.__mod__()` must be a tuple or a dict, got {type(args)}.")
         # start index
         seg = self.copy(istart=args.get("start"))
         # plain
