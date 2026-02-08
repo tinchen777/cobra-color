@@ -83,12 +83,12 @@ def imgfile_to_ansi(
     """
     img = Image.open(img_path)
 
-    aspect_ratio = img.height / img.width
-    if height is not None or width is not None:
-        if height is None and width is not None:
-            height = int(aspect_ratio * width)
-        elif width is None and height is not None:
-            width = int(height / aspect_ratio)
+    hw_ratio = img.height / img.width
+    if height is None and width is not None:
+        img = img.resize((width, int(hw_ratio * width)))
+    elif width is None and height is not None:
+        img = img.resize((int(height / hw_ratio), height))
+    elif width is not None and height is not None:
         img = img.resize((width, height))
 
     return image_to_ansi(img, mode=mode, charset=charset, display=display)
