@@ -3,7 +3,7 @@
 cobra-color
 ===========
 
-A lightweight Python package for terminal display enhancements.
+A lightweight and easy-to-use Python package for terminal display enhancements.
 
 Modules
 -------
@@ -67,7 +67,7 @@ from .output import (safe_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 __all__ = [
     "cstr",

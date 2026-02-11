@@ -16,6 +16,7 @@ from ._utils import (
     loc
 )
 from ._extension import (to_ExtStr, ExtStr)
+from ..exceptions import (ParameterIgnoredWarning, CobraColorError)
 from ..types import (T_ColorSpec, T_ColorTrans, T_StyleTrans, T_StyleSpec)
 
 
@@ -323,7 +324,7 @@ class ColorSeg:
                 for style_target, style_to in styles:
                     self._update_styles(style_target, style_to)
         except Exception:
-            raise RuntimeError("`ColorSeg._update()` error.")
+            raise CobraColorError("`ColorSeg._update()` error.")
 
     def __call__(self, str_: Any, /) -> ColorSeg:
         r"""Apply the pattern of the **`Segment`** to a new string."""
@@ -397,7 +398,7 @@ class ColorSeg:
                     else:
                         warnings.warn(
                             f"Key '@fg' in mapping rules for Segment creation must be a sequence of two color specifications (target and replacement), got {val!r}. This rule will be ignored.",
-                            category=UserWarning,
+                            category=ParameterIgnoredWarning,
                             stacklevel=2
                         )
                 elif key == "-fg":
@@ -412,7 +413,7 @@ class ColorSeg:
                     else:
                         warnings.warn(
                             f"Key '@bg' in mapping rules for Segment creation must be a sequence of two color specifications (target and replacement), got {val!r}. This rule will be ignored.",
-                            category=UserWarning,
+                            category=ParameterIgnoredWarning,
                             stacklevel=2
                         )
                 elif key == "-bg":
@@ -427,7 +428,7 @@ class ColorSeg:
                     else:
                         warnings.warn(
                             f"Key '@styles' in mapping rules for Segment creation must be a sequence of two style specifications (target and replacement), got {val!r}. This rule will be ignored.",
-                            category=UserWarning,
+                            category=ParameterIgnoredWarning,
                             stacklevel=2
                         )
                 elif key == "-styles":

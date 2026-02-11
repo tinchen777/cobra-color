@@ -16,16 +16,16 @@
 
 ## About
 
-A lightweight Python library for enhanced terminal display: simple text color/style conventions and image-to-terminal rendering.
+A lightweight and easy-to-use Python library for enhanced terminal display: simple text color/style conventions and image-to-terminal rendering.
 
 - Python: 3.9+
 - Runtime deps: Pillow (>=9,<11), NumPy (>=1.21,<2)
 
 ## Features
 
-- 🚀 Concise color/style names for terminal text.
-- 🚀 Image rendering in multiple modes: ASCII, color, half-color, gray, half-gray.
-- 🚀 Minimal dependencies and easy integration.
+- 🚀 High compatibility with Python’s built-in `str` type.
+- 🚀 Easy and intuitive creation of color strings.
+- 🚀 Convert images to colored terminal output in a single step.
 
 ## Installation
 

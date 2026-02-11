@@ -217,8 +217,8 @@ def fonttext_to_ansi(
     if os.path.isfile(font):
         try:
             pil_font = ImageFont.truetype(font, size=font_size)
-        except Exception:
-            raise ValueError(f"`fonttext_to_ansi()` failed to load font from path {font!r}")
+        except Exception as e:
+            raise FileNotFoundError(f"`fonttext_to_ansi()` failed to load font from path {font!r}") from e
 
     elif isinstance(font, FontName):
         with pkg_resources.path(fonts, font.value) as font_path:

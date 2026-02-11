@@ -1,3 +1,4 @@
+# src/cobra_color/types.py
 """
 Type definitions for :pkg:`cobra_color` package.
 """

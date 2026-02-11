@@ -9,6 +9,7 @@ from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Uni
 from ._extension import (ExtStr, to_ExtStr)
 from ._segment import (ColorSeg, ansi_to_segments)
 from ._utils import (wrap_exc, to_fgcode, to_bgcode, to_style_codes, loc)
+from ..exceptions import NotFoundError
 from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
 
 
@@ -243,7 +244,7 @@ class ColorStr(ExtStr):
         else:
             # segments provided
             if any(not isinstance(seg, ColorSeg) for seg in segments):
-                raise TypeError(f"All arguments of `ColorStr.__new__` must be `ColorSeg` instances. Use `ColorStr.from_iter()` for other types.")
+                raise TypeError("All arguments of `ColorStr.__new__` must be `ColorSeg` instances. Use `ColorStr.from_iter()` for other types.")
             new_segments = [segments[0].copy() if copy else segments[0]]
             new_segments[-1].set_istart(0)
             for seg in segments[1:]:
@@ -839,7 +840,7 @@ class ColorStr(ExtStr):
                 if seg.istart <= key < seg.iend:
                     return ColorStr(seg(self.plain[key]), copy=False)
             # should not reach here
-            raise IndexError(f"Can not match index {key} in segments of ColorStr.")
+            raise NotFoundError(f"Can not match index {key} in segments of ColorStr.")
         else:
             return ColorStr.from_str(super().__getitem__(key))
 
