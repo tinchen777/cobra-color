@@ -8,7 +8,7 @@ import numpy as np
 from typing import (Tuple, List, Union, Iterable)
 
 from ..string import to_ansi
-from ..output import safe_print
+from .._output import safe_print
 from ..exceptions import (ImgFillingModeError, DimensionError)
 from ..types import T_ImgFillingMode
 

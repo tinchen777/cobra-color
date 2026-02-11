@@ -14,7 +14,7 @@ Functions
 from typing import (Any, Mapping, Sequence, List)
 
 from .string import ColorSeg
-from .output import safe_print
+from ._output import safe_print
 
 
 _STYLES = {

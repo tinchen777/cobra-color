@@ -10,7 +10,6 @@ Modules
 - :mod:`cobra_color.string`: Colored string manipulation and generation.
 - :mod:`cobra_color.render`: Rendering utilities for rendering text and images in the terminal.
 - :mod:`cobra_color.format`: Formatting utilities for structured data display.
-- :mod:`cobra_color.output`: Output utilities for safe printing in the terminal.
 Functions
 ---------
 - :func:`cstr`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.
@@ -63,11 +62,11 @@ Render some text with fonts in the terminal:
 """
 
 from .string import (cstr, to_ansi)
-from .output import (safe_print, set_console)
+from ._output import (safe_print, set_console)
 
 
 __author__ = "Zhen Tian"
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 __all__ = [
     "cstr",
