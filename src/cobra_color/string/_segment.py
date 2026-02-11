@@ -108,7 +108,7 @@ class ColorSeg:
             self._style_codes = set(style_codes)
             self._style_codes.discard("")
         except TypeError:
-            raise TypeError(f"`style_codes` parameter of `ColorSeg.__init__()` must be an iterable, got {type(style_codes)}.")
+            raise TypeError(f"`style_codes` parameter of `ColorSeg.__init__()` must be an iterable, got {type(style_codes)}.") from None
         # init start index
         self._START_IDX = 0
 
@@ -323,8 +323,8 @@ class ColorSeg:
             if styles is not None:
                 for style_target, style_to in styles:
                     self._update_styles(style_target, style_to)
-        except Exception:
-            raise CobraColorError("`ColorSeg._update()` error.")
+        except Exception as e:
+            raise CobraColorError("`ColorSeg._update()` error.") from e
 
     def __call__(self, str_: Any, /) -> ColorSeg:
         r"""Apply the pattern of the **`Segment`** to a new string."""
