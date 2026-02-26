@@ -36,7 +36,7 @@ def fmt_dict(
     title: str = "",
     display: bool = True
 ) -> str:
-    r"""
+    """
     Format and display a dictionary or object's attributes in a structured manner.
 
     Parameters
@@ -125,7 +125,7 @@ def fmt_dict(
 
 
 def fmt_list(target: Sequence[Any], /, display: bool = True) -> str:
-    r"""
+    """
     Format and display a list in a structured manner.
 
     Parameters

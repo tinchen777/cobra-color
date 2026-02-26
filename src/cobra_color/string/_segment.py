@@ -21,7 +21,7 @@ from ..types import (T_ColorSpec, T_ColorTrans, T_StyleTrans, T_StyleSpec)
 
 
 def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
-    r"""
+    """
     Parse an ANSI formatted string into a list of **`Segment`**.
     """
     cur_fg = cur_bg = ""
@@ -61,7 +61,7 @@ def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
 
 @final
 class ColorSeg:
-    r"""
+    """
     A class of string **`{Segment}`** with pattern.
     """
     _START_IDX: int
@@ -75,7 +75,7 @@ class ColorSeg:
         bg: Optional[T_ColorSpec] = None,
         styles: Optional[T_StyleSpec] = None
     ):
-        r"""
+        """
         Create a **`Segment`** from a string with specified pattern.
         """
         return cls(
@@ -87,7 +87,7 @@ class ColorSeg:
 
     @classmethod
     def empty(cls):
-        r"""
+        """
         Create an empty **`Segment`**.
         """
         return cls("", fg_code="", bg_code="", style_codes=set())
@@ -120,7 +120,7 @@ class ColorSeg:
         real_index: bool = False,
         flags: Tuple[Literal["plain", "fg", "bg", "styles"], ...] = ("plain", "fg", "bg", "styles")
     ) -> bool:
-        r"""
+        """
         Check if the **`Segment`** is equal to another object at the specified range based on specified attributes.
 
         Parameters
@@ -158,7 +158,7 @@ class ColorSeg:
         return True
 
     def assemble(self, *enable: Literal["fg", "bg", "styles"]) -> ExtStr:
-        r"""
+        """
         Assemble the **`Segment`** into an ANSI formatted **`Extended String`** based on specified attributes.
         """
         if not self.plain:
@@ -172,7 +172,7 @@ class ColorSeg:
         return self.plain
 
     def copy(self, istart: Optional[int] = None) -> ColorSeg:
-        r"""
+        """
         Create a copy of the **`Segment`**.
         """
         new_seg = ColorSeg(
@@ -185,14 +185,14 @@ class ColorSeg:
         return new_seg
 
     def set_istart(self, idx: Any, /):
-        r"""
+        """
         Set the relative start index of the **`Segment`**, use for internal only.
         """
         if isinstance(idx, int) and idx >= 0:
             self._START_IDX = idx
 
     def apply(self, str_: Any, /) -> ColorSeg:
-        r"""
+        """
         Apply the pattern of the **`Segment`** to a new string.
 
         Parameters
@@ -213,7 +213,7 @@ class ColorSeg:
         /,
         real_index: bool = False
     ) -> Tuple[ColorSeg, ColorSeg, ColorSeg]:
-        r"""
+        """
         Split the **`Segment`** into three parts: `left`, `middle`, and `right` segments based on the specified indices.
 
         Parameters
@@ -230,7 +230,7 @@ class ColorSeg:
                 A tuple containing the `left`, `middle`, and `right` segments with updated indices.
         """
         def _create_seg(start: int, end: int, /):
-            r"""Create a **`Segment`** for the specified substring."""
+            """Create a **`Segment`** for the specified substring."""
             plain = self.plain[start: end]
             if len(plain) == 0:
                 return ColorSeg.empty()
@@ -246,13 +246,13 @@ class ColorSeg:
         )
 
     def to_ansi(self) -> ExtStr:
-        r"""
+        """
         Covert the **`Segment`** to an ANSI formatted **`Extended String`**.
         """
         return self.assemble("fg", "bg", "styles")
 
     def _update_plain(self, target: Any, /, mode: Literal["=", "+="] = "="):
-        r"""Modify the plain string of the **`Segment`**."""
+        """Modify the plain string of the **`Segment`**."""
         if target is not None:
             if mode == "=":
                 self._plain = to_ExtStr(target)
@@ -262,12 +262,12 @@ class ColorSeg:
                 raise ValueError(f"`mode` parameter of `ColorSeg._update_plain()` must be either '=' for replacement or '+=' for appending, got {mode!r}.")
 
     def _update_fg(self, target: Optional[str], to: Optional[str], /):
-        r"""Update the foreground color of the **`Segment`**."""
+        """Update the foreground color of the **`Segment`**."""
         if to is not None and self.fg == target:
             self._fg_code = to
 
     def _update_bg(self, target: Optional[str], to: Optional[str], /):
-        r"""Update the background color of the **`Segment`**."""
+        """Update the background color of the **`Segment`**."""
         if to is not None and self.bg == target:
             self._bg_code = to
 
@@ -277,7 +277,7 @@ class ColorSeg:
         to: Optional[Set[str]],
         /
     ):
-        r"""Update the styles of the **`Segment`**."""
+        """Update the styles of the **`Segment`**."""
         if target == "all":
             # modify all styles
             if to is None:  # "all", None
@@ -305,7 +305,7 @@ class ColorSeg:
         bg: Optional[Union[Sequence[T_ColorTrans], str]] = None,
         styles: Optional[Sequence[T_StyleTrans]] = None
     ):
-        r"""Update the pattern of the **`Segment`** based on the provided mapping rules."""
+        """Update the pattern of the **`Segment`** based on the provided mapping rules."""
         try:
             # foreground
             if isinstance(fg, str):
@@ -327,7 +327,7 @@ class ColorSeg:
             raise CobraColorError("`ColorSeg._update()` error.") from e
 
     def __call__(self, str_: Any, /) -> ColorSeg:
-        r"""Apply the pattern of the **`Segment`** to a new string."""
+        """Apply the pattern of the **`Segment`** to a new string."""
         return self.apply(str_)
 
     def __repr__(self) -> str:
@@ -346,7 +346,7 @@ class ColorSeg:
         return self.copy()
 
     def __mod__(self, args: Any, /) -> ColorSeg:
-        r"""
+        """
         Create a new **`Segment`** with modified attributes based on the provided mapping rules.
 
         Parameters
@@ -439,70 +439,70 @@ class ColorSeg:
 
     @property
     def istart(self) -> int:
-        r"""
+        """
         The relative start index of the **`Segment`**.
         """
         return self._START_IDX
 
     @property
     def iend(self) -> int:
-        r"""
+        """
         The relative end index of the **`Segment`**.
         """
         return self._START_IDX + len(self)
 
     @property
     def isfgcolored(self) -> bool:
-        r"""
+        """
         Check if the **`Segment`** has any foreground color applied.
         """
         return bool(self.fg)
 
     @property
     def isbgcolored(self) -> bool:
-        r"""
+        """
         Check if the **`Segment`** has any background color applied.
         """
         return bool(self.bg)
 
     @property
     def isstyled(self) -> bool:
-        r"""
+        """
         Check if the **`Segment`** has any style applied.
         """
         return bool(self.styles)
 
     @property
     def isplain(self) -> bool:
-        r"""
+        """
         Check if the **`Segment`** is plain (no pattern applied).
         """
         return not (self.isfgcolored or self.isbgcolored or self.isstyled)
 
     @property
     def plain(self) -> ExtStr:
-        r"""
+        """
         The string of the **`Segment`** without and pattern.
         """
         return self._plain
 
     @property
     def fg(self) -> str:
-        r"""
+        """
         The foreground color code of the **`Segment`**.
         """
         return self._fg_code
 
     @property
     def bg(self) -> str:
-        r"""
+        """
         The background color code of the **`Segment`**.
         """
         return self._bg_code
 
     @property
     def styles(self) -> Set[str]:
-        r"""
+        """
         The set of style names applied to the **`Segment`**.
         """
         return self._style_codes

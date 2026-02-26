@@ -23,7 +23,7 @@ def image_to_ansi(
     charset: str = "@%#*+=-:. ",
     display: bool = False
 ) -> str:
-    r"""
+    """
     Render an image (:class:`PIL.Image.Image`) into a string representation based on the specified mode.
 
     Parameters
@@ -121,7 +121,7 @@ def binarize_image(
     upper_rgb: Tuple[int, int, int] = (255, 255, 255),
     lower_rgb: Tuple[int, int, int] = (0, 0, 0)
 ) -> Image.Image:
-    r"""
+    """
     Create a binary image from the given source based on the specified threshold and RGB colors.
 
     Parameters
@@ -171,7 +171,7 @@ def binarize_image(
 
 
 def trim_image_border(img: Image.Image, /, value: int = 0):
-    r"""
+    """
     Trim the border of the image that matches the specified value.
 
     Parameters

@@ -14,7 +14,7 @@ from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
 
 
 def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
-    r"""
+    """
     Convert a single object to **`Extended String`**, with default value if empty.
     Minimize copying.
     """
@@ -23,7 +23,7 @@ def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
 
 
 def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
-    r"""
+    """
     Convert a single object to **`Color String`**, with default value if empty.
     Minimize copying.
     """
@@ -37,7 +37,7 @@ def to_cstr(obj: Any, default: Optional[str] = None, /) -> ColorStr:
 
 
 def to_segments(obj: Any, /) -> List[ColorSeg]:
-    r"""
+    """
     Convert a single object to a list of **`Segment`** with minimize copying.
     """
     if isinstance(obj, ColorSeg):
@@ -55,7 +55,7 @@ def cstr(
     styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None,
     sep: Any = ""
 ) -> ColorStr:
-    r"""
+    """
     Generate an easy-to-use **`{Color String}`** with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
 
     Parameters
@@ -63,7 +63,7 @@ def cstr(
         *objects: Any
             Objects concatenated in order to a new **`Color String`**.
 
-            NOTE: `"\033["` in string will be treated as ANSI escape codes, other objects will automatically converted to **`Color String`**.
+            NOTE: `"\\033["` in string will be treated as ANSI escape codes, other objects will automatically converted to **`Color String`**.
 
         fg : Optional[Union[T_ColorDesc, Literal["clear", ""]]], default to `None`
             The foreground color of the **`Color String`**.
@@ -109,7 +109,7 @@ def cstr(
     Useages
     --------
     >>> # 1. Create a simple colored string.
-    >>> cstr("\x1b[4m下划线\x1b[0m")
+    >>> cstr("\\x1b[4m下划线\\x1b[0m")
     >>> # 2. Create a colored string with foreground color, background color or styles.
     >>> cstr("Hello World!", fg="r", styles=["bold", "udl"])
     >>> # 3. Rebuild a colored string with mapping rules.
@@ -130,7 +130,7 @@ def to_ansi(
     bg: Optional[T_ColorSpec] = None,
     styles: Optional[T_StyleSpec] = None
 ) -> ExtStr:
-    r"""
+    """
     Convert an object to an ANSI formatted **`Extended String`** with specified pattern.
 
     Returns
@@ -189,7 +189,7 @@ def _clip_method(func):
 
 @final
 class ColorStr(ExtStr):
-    r"""
+    """
     A class of **`{Color String}`** that extends :class:`ExtStr`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
     """
     _SEGMENTS: List[ColorSeg]
@@ -204,7 +204,7 @@ class ColorStr(ExtStr):
         bg: Optional[T_ColorSpec] = None,
         styles: Optional[T_StyleSpec] = None
     ):
-        r"""
+        """
         Create a **`Color String`** from a single string.
 
         Notes
@@ -217,7 +217,7 @@ class ColorStr(ExtStr):
 
     @classmethod
     def from_iter(cls, *objects: Any, sep: Any = ""):
-        r"""
+        """
         Create a **`Color String`** from an iterable of objects.
 
         Notes
@@ -235,7 +235,7 @@ class ColorStr(ExtStr):
         return cls(*segments)
 
     def __new__(cls, *segments: ColorSeg, copy: bool = True):
-        r"""
+        """
         Create a **`Color String`** from some **`Segment`**.
         """
         if len(segments) == 0:
@@ -274,7 +274,7 @@ class ColorStr(ExtStr):
         bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
-        r"""
+        """
         Rebuild A new **`Color String`** according to the specified mapping rules.
 
         Parameters
@@ -307,7 +307,7 @@ class ColorStr(ExtStr):
         return self.insert(start, new_sub, overwrite=True)
 
     def pieces(self) -> List[ColorStr]:
-        r"""
+        """
         Get the list of **`Color String`** pieces from the segments.
 
         Returns
@@ -325,7 +325,7 @@ class ColorStr(ExtStr):
         extend: Optional[Literal["left", "right", "all"]] = None,
         _from_left: bool = True
     ) -> ColorStr:
-        r"""
+        """
         Apply the pattern of the **`Color String`** to another object from the `left`.
 
         Parameters
@@ -397,7 +397,7 @@ class ColorStr(ExtStr):
         start_idx: int = 0,
         extend: Optional[Literal["left", "right", "all"]] = None
     ) -> ColorStr:
-        r"""
+        """
         Apply the pattern of the **`Color String`** to another object from the `right`.
 
         Notes
@@ -415,7 +415,7 @@ class ColorStr(ExtStr):
         limit: int = -1,
         _reverse: bool = False
     ) -> List[int]:
-        r"""
+        """
         Find all occurrences of a substring in the **`Color String`** from the `left`.
 
         Parameters
@@ -470,7 +470,7 @@ class ColorStr(ExtStr):
         /,
         limit: int = -1
     ) -> List[int]:
-        r"""
+        """
         Find all occurrences of a substring in the **`Color String`** from the `right`.
 
         Notes
@@ -546,7 +546,7 @@ class ColorStr(ExtStr):
         overwrite: bool = False,
         keep_pattern: bool = True
     ) -> ColorStr:
-        r"""
+        """
         Insert a substring into the **`Color String`** at the specified index.
 
         Parameters
@@ -685,7 +685,7 @@ class ColorStr(ExtStr):
         return False
 
     def equal(self, other: Any, at: Optional[slice] = None, /) -> bool:
-        r"""
+        """
         Check if the **`Color String`** is equal to another object at the specified range.
 
         Parameters
@@ -734,7 +734,7 @@ class ColorStr(ExtStr):
         return False
 
     def copy(self):
-        r"""
+        """
         Create a copy of the **`Color String`**.
         """
         return ColorStr(*self._SEGMENTS)
@@ -745,7 +745,7 @@ class ColorStr(ExtStr):
         bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
         styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
     ):
-        r"""Update the pattern mapping of the **`Color String`** in place.
+        """Update the pattern mapping of the **`Color String`** in place.
 
         Notes
         -----
@@ -753,7 +753,7 @@ class ColorStr(ExtStr):
         - Adjacent segments with the same pattern in the updated **`Color String`** will not be automatically merged."""
 
         def _fmt_c_mapping(m: Any, func: Any, /):
-            r"""Format the color mapping input."""
+            """Format the color mapping input."""
             if m is None:
                 return
             elif m == "clear":
@@ -765,7 +765,7 @@ class ColorStr(ExtStr):
             return func(m)
 
         def _fmt_s_mapping(m: Any, func: Any, /) -> Optional[List[Any]]:
-            r"""Format the style mapping input."""
+            """Format the style mapping input."""
             if m is None:
                 return
             elif m == "clear":
@@ -852,21 +852,21 @@ class ColorStr(ExtStr):
 
     @property
     def iscombined(self) -> bool:
-        r"""
+        """
         Check if the **`Color String`** is combined from multiple segments.
         """
         return len(self._SEGMENTS) > 1
 
     @property
     def plain(self) -> ExtStr:
-        r"""
+        """
         The string of  **`Color String`** without any pattern.
         """
         return self._plain
 
     @cached_property
     def rich(self) -> ExtStr:
-        r"""
+        """
         The string of **`Color String`** with pattern.
         """
         return ExtStr.from_iter(*(seg.to_ansi() for seg in self._SEGMENTS))

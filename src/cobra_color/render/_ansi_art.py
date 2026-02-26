@@ -46,7 +46,7 @@ def imgfile_to_ansi(
     display: bool = False,
     charset: str = "@%#*+=-:. "
 ) -> str:
-    r"""
+    """
     Convert an image file to a string representation based on the specified mode.
 
     Parameters
@@ -140,7 +140,7 @@ def fonttext_to_ansi(
     fore_rgb: Tuple[int, int, int] = (255, 255, 255),
     back_rgb: Tuple[int, int, int] = (0, 0, 0)
 ) -> str:
-    r"""
+    """
     Render colored text based on a specified font into a string representation.
 
     Parameters

@@ -57,10 +57,10 @@ def _fmt_ansicolor(
     c_code: Any = "",
     c_mode: Any = "",
 ) -> Tuple[Optional[str], Optional[str]]:
-    r"""Format ANSI color code from an iterator of codes.
+    """Format ANSI color code from an iterator of codes.
     Return foreground and background color codes."""
     def _fmt_args(code: str):
-        r"""Format the arguments for ANSI color code."""
+        """Format the arguments for ANSI color code."""
         mode = str(c_mode or next(code_iter, ""))
         if mode == "5":
             # 256 color
@@ -90,7 +90,7 @@ def _fmt_ansicolor(
 
 
 def _to_color_code(c: Any, /, is_fg: bool) -> Optional[str]:
-    r"""Parse the color input into ANSI color code."""
+    """Parse the color input into ANSI color code."""
     if isinstance(c, str):
         # Basic 8 color OR Light 8 color
         if c in __STANDARD_COLOR_MAP:  # "d"
@@ -114,21 +114,21 @@ def _to_color_code(c: Any, /, is_fg: bool) -> Optional[str]:
 
 
 def to_fgcode(c: Any, /) -> Optional[str]:
-    r"""
+    """
     Parse the color input into ANSI foreground color code.
     """
     return _to_color_code(c, is_fg=True)
 
 
 def to_bgcode(c: Any, /) -> Optional[str]:
-    r"""
+    """
     Parse the color input into ANSI background color code.
     """
     return _to_color_code(c, is_fg=False)
 
 
 def to_style_codes(styles: Any, /) -> Set[str]:
-    r"""
+    """
     Parse the styles into ANSI style codes.
     """
     if isinstance(styles, str):
@@ -148,7 +148,7 @@ def to_style_codes(styles: Any, /) -> Set[str]:
 
 # --------------- Other Utils ---------------
 def to_str(obj: Any, /) -> str:
-    r"""
+    """
     Convert a single object to :class:`str` with minimize copying.
     """
     return obj if isinstance(obj, str) else str(obj)
@@ -171,7 +171,7 @@ def loc(len_: int, start: int, end: int, /, offset: int = 0) -> Tuple[int, int]:
 
 
 def loc(len_: int, a_: Optional[Union[slice, int]], b_: Optional[int] = None, /, offset: int = 0):
-    r"""
+    """
     Locate the indices in a string of given length with an optional :param:`offset`.
     """
     offset = max(offset, 0)  # ensure non-negative offset
@@ -202,7 +202,7 @@ def loc(len_: int, a_: Optional[Union[slice, int]], b_: Optional[int] = None, /,
 
 
 def wrap_exc(func):
-    r"""
+    """
     A decorator to wrap exceptions with function call details.
     """
     @wraps(func)

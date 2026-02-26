@@ -9,7 +9,7 @@ from ._utils import to_str
 
 
 def to_ExtStr(obj: Any, /) -> ExtStr:
-    r"""
+    """
     Convert a single object to **`Extended String`**.
     Ensure it is a subclass of :class:`ExtStr`.
     """
@@ -17,7 +17,7 @@ def to_ExtStr(obj: Any, /) -> ExtStr:
 
 
 class ExtStr(str):
-    r"""
+    """
     A class of **`{Extended String}`** extends the built-in :class:`str` class.
     """
     _is_fg_colored: bool = False
@@ -27,7 +27,7 @@ class ExtStr(str):
 
     @classmethod
     def from_iter(cls, *objects: Any):
-        r"""
+        """
         Create an **`Extended String`** from an iterable of objects.
         """
         return cls("".join(map(to_str, objects)))
@@ -40,7 +40,7 @@ class ExtStr(str):
         /,
         limit: int = -1
     ) -> List[int]:
-        r"""
+        """
         Find all occurrences of a substring in the **`Extended String`** from the `left`.
 
         Parameters
@@ -72,7 +72,7 @@ class ExtStr(str):
         /,
         limit: int = -1
     ) -> List[int]:
-        r"""
+        """
         Find all occurrences of a substring in the **`Extended String`** from the `right`.
 
         Notes
@@ -92,7 +92,7 @@ class ExtStr(str):
         limit: int = -1,
         reverse: bool = False
     ):
-        r"""Create a generator to search for occurrences of a substring in the **`Extended String`**."""
+        """Create a generator to search for occurrences of a substring in the **`Extended String`**."""
         count = 0
         while limit < 0 or count < limit:
             if reverse:
@@ -107,7 +107,7 @@ class ExtStr(str):
             count += 1
 
     def _add_judgment(self, segments: List[Any], /):
-        r"""Add pattern judgment attributes to the **`Extended String`**."""
+        """Add pattern judgment attributes to the **`Extended String`**."""
         self._is_fg_colored = any(seg.isfgcolored for seg in segments)
         self._is_bg_colored = any(seg.isbgcolored for seg in segments)
         self._is_styled = any(seg.isstyled for seg in segments)
@@ -124,35 +124,35 @@ class ExtStr(str):
 
     @property
     def isfgcolored(self) -> bool:
-        r"""
+        """
         Whether the **`Extended String`** has any foreground color applied.
         """
         return self._is_fg_colored
 
     @property
     def isbgcolored(self) -> bool:
-        r"""
+        """
         Whether the **`Extended String`** has any background color applied.
         """
         return self._is_bg_colored
 
     @property
     def isstyled(self) -> bool:
-        r"""
+        """
         Whether the **`Extended String`** has any style applied.
         """
         return self._is_styled
 
     @property
     def isplain(self) -> bool:
-        r"""
+        """
         Whether the **`Extended String`** is plain (no pattern applied).
         """
         return self._is_plain
 
     @property
     def plain(self) -> ExtStr:
-        r"""
+        """
         The **`Extended String`**.
         """
         return self

@@ -22,7 +22,7 @@ _GLOBAL_CONSOLE: Optional[Console] = None  # output function
 
 
 def set_console(func: Callable[..., Any], **kwargs: Any):
-    r"""
+    """
     Set a global console for :func:`safe_print`.
 
     Parameters
@@ -38,7 +38,7 @@ def set_console(func: Callable[..., Any], **kwargs: Any):
 
 
 class Console():
-    r"""
+    """
     A wrapper for console output functions with preset keyword arguments.
     """
     def __init__(self, func: Callable[..., Any], **kwargs: Any):
@@ -57,7 +57,7 @@ def safe_print(
     flush: bool = False,
     console: Optional[Union[Callable[..., Any], Console, Any]] = None
 ):
-    r"""
+    """
     A safe print function that works well with progress bars from :pkg:`tqdm` and :pkg:`rich` consoles.
 
     Parameters
@@ -68,7 +68,7 @@ def safe_print(
         sep : str, default to `" "`
             Separator between values.
 
-        end : str, default to `"\n"`
+        end : str, default to `"\\n"`
             End character after printing.
 
         file : Optional[Any], default to `None`
