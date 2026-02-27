@@ -105,5 +105,5 @@ See LICENSE in the repository.
 
 ## Links
 
-- Homepage/Repo: https://github.com/tinchen777/cobra-color.git
-- Issues: https://github.com/tinchen777/cobra-color.git/issues
+- [Homepage/Repo](https://github.com/tinchen777/cobra-color.git)
+- [Issues](https://github.com/tinchen777/cobra-color.git/issues)
