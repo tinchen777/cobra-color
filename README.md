@@ -19,7 +19,6 @@
 A lightweight and easy-to-use Python library for enhanced terminal display: simple text color/style conventions and image-to-terminal rendering.
 
 - Python: 3.9+
-- Runtime deps: Pillow (>=9,<11), NumPy (>=1.21,<2)
 
 ## Features
 
@@ -29,10 +28,20 @@ A lightweight and easy-to-use Python library for enhanced terminal display: simp
 
 ## Installation
 
-Stable (once published):
+### Install from PyPI
+
+This installs the core package with minimal dependencies.
 
 ```bash
 pip install cobra-color
+```
+
+### Install with Optional Dependencies
+
+`cobra.render` module support.
+
+```bash
+pip install cobra-color[render]
 ```
 
 ## Quick Start
@@ -96,8 +105,8 @@ Tip: For best results, use a TrueColor-capable terminal and a monospaced font.
 ## Requirements
 
 - Python >= 3.9
-- `Pillow` >= 9.0, < 11
-- `NumPy` >= 1.21, < 2.0
+- (Optional) `Pillow` >= 9.0, < 11.0
+- (Optional) `NumPy` >= 1.21, < 2.0
 
 ## License
 

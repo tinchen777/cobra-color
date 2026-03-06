@@ -2,6 +2,10 @@
 """
 Rendering Module for :pkg:`cobra_color` package.
 
+The following dependency libraries are required:
+- `Pillow`
+- `NumPy`
+
 Functions
 ---------
 - :func:`imgfile_to_ansi`: Convert an image file to a string representation based on the specified mode.
@@ -14,10 +18,17 @@ Classes
 - :class:`FontName`: Enum for built-in font names.
 """
 
-from ._ansi_art import (imgfile_to_ansi, fonttext_to_ansi)
 from .fonts import FontName
-from ._utils import (image_to_ansi, binarize_image, trim_image_border)
-
+try:
+    from ._ansi_art import (imgfile_to_ansi, fonttext_to_ansi)
+    from ._utils import (image_to_ansi, binarize_image, trim_image_border)
+except ImportError as e:
+    from ..exceptions import ModuleUnavailableError
+    raise ModuleUnavailableError(
+        "`cobra_color.render` module is unavailable, "
+        "optional dependency 'Pillow', `NumPy` are required. "
+        "Install it via: pip install cobra-algo[render]"
+    ) from e
 
 __all__ = [
     "imgfile_to_ansi",

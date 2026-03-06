@@ -18,6 +18,10 @@ class CobraColorError(Exception):
     """Base error class for :pkg:`cobra_color` package."""
 
 
+class ModuleUnavailableError(CobraColorError):
+    """Error raised when a module is unavailable."""
+
+
 class ImgFillingModeError(CobraColorError):
     """Error raised when an invalid image filling mode is specified."""
 
