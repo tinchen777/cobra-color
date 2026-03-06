@@ -27,7 +27,7 @@ except ImportError as e:
     raise ModuleUnavailableError(
         "`cobra_color.render` module is unavailable, "
         "optional dependency 'Pillow', `NumPy` are required. "
-        "Install it via: pip install cobra-algo[render]"
+        "Install it via: pip install cobra-color[render]"
     ) from e
 
 __all__ = [
