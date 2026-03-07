@@ -3,7 +3,6 @@
 # @TianZhen
 
 from __future__ import annotations
-# FIXME 
 from PIL import (Image, ImageChops)
 import numpy as np
 from typing import (Tuple, List, Union, Iterable)

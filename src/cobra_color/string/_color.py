@@ -106,15 +106,23 @@ def cstr(
         ColorStr
             A new **`Color String`** with the specified pattern.
 
-    Useages
+    Examples
     --------
-    >>> # 1. Create a simple colored string.
+    1. Create a simple colored string.
     >>> cstr("\\x1b[4m下划线\\x1b[0m")
-    >>> # 2. Create a colored string with foreground color, background color or styles.
+
+    2. Create a colored string with foreground color, background color or styles.
     >>> cstr("Hello World!", fg="r", styles=["bold", "udl"])
-    >>> # 3. Rebuild a colored string with mapping rules.
-    >>> cstr(c_str, fg=[("r", "lg"), (None, (255, 1, 92))], bg="", styles=[("del", None), (None, ["bold", "udl"])])
-    >>> # 4. Combine multiple objects into a colored string with sep.
+
+    3. Rebuild a colored string with mapping rules.
+    >>> cstr(
+    >>>     c_str,
+    >>>     fg=[("r", "lg"), (None, (255, 1, 92))],
+    >>>     bg="",
+    >>>     styles=[("del", None), (None, ["bold", "udl"])]
+    >>> )
+
+    4. Combine multiple objects into a colored string with sep.
     >>> cstr("a", c_str, 1243, sep=cstr("sep", fg="y"))
     """
     c_str = ColorStr.from_iter(*objects, sep=sep)
