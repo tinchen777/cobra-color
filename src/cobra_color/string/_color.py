@@ -807,7 +807,8 @@ class ColorStr(ExtStr):
         return ColorStr(*self._SEGMENTS, *to_cstr(other)._SEGMENTS)
 
     def __mul__(self, n: Any, /):
-        assert isinstance(n, int), f"Can only multiply ColorStr by an integer, got {type(n)}."
+        if not isinstance(n, int):
+            raise TypeError(f"Can only multiply ColorStr by an integer, got {type(n)}.")
         if n <= 0:
             return ColorStr()
         return ColorStr(*[seg for _ in range(n) for seg in self._SEGMENTS])
