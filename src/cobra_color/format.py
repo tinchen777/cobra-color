@@ -16,6 +16,10 @@ from typing import (Any, Mapping, Sequence, List)
 from .string import ColorSeg
 from ._output import safe_print
 
+__all__ = [
+    "fmt_dict",
+    "fmt_list"
+]
 
 _STYLES = {
     "title": ColorSeg.from_raw("", fg="y", styles={"bold"}),

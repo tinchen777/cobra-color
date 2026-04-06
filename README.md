@@ -1,6 +1,9 @@
 <div align="center">
 
-<h2 id="title">🐱‍👤 cobra-color 🐱‍👤</h2>
+<h2 id="title">
+🎨 cobra-color 🎨<br>
+<sub>Turn a Plain Terminal into an Expressive Visual Canvas</sub>
+</h2>
 
 [![PyPI version](https://img.shields.io/pypi/v/cobra-color.svg)](https://pypi.org/project/cobra-color/)
 ![Python](https://img.shields.io/pypi/pyversions/cobra-color?color=brightgreen)
@@ -16,15 +19,15 @@
 
 ## About
 
-A lightweight and easy-to-use Python library for enhanced terminal display: simple text color/style conventions and image-to-terminal rendering.
+`cobra-color` is a lightweight, easy-to-use Python library for enhanced terminal output, combining string-friendly color styling with one-step ANSI image rendering.
 
 - Python: 3.9+
 
 ## Features
 
-- 🚀 High compatibility with Python’s built-in `str` type.
-- 🚀 Easy and intuitive creation of color strings.
-- 🚀 Convert images to colored terminal output in a single step.
+- 🚀 **Strong compatibility with native Python strings**: Keep familiar `str` workflows while preserving color/style through operations like concatenation and transformations.
+- 🚀 **Full terminal rendering toolkit**: Supports both styled text output and image-to-ANSI conversion across multiple modes (such as ascii, half-color, and gray).
+- 🚀 **Lightweight and developer-friendly**: Minimal core dependencies, optional render extras, and safe_print support for tqdm/rich-friendly console output.
 
 ## Installation
 

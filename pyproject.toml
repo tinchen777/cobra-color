@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cobra-color"
 dynamic = ["version"]
-description = "A Python library for enhanced terminal display."
+description = "A lightweight, easy-to-use Python library for enhanced terminal output, combining string-friendly color styling with one-step ANSI image rendering."
 readme = "README.md"
 license-files = ["LICENSE"]
 authors = [

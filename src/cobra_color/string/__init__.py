@@ -1,6 +1,6 @@
 # src/cobra_color/string/__init__.py
 """
-String utilities for :pkg:`cobra_color` package.
+String utilities for :pkg:`cobra_color`.
 
 Functions
 ---------

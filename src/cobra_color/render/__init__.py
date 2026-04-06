@@ -22,13 +22,13 @@ from .fonts import FontName
 try:
     from ._ansi_art import (imgfile_to_ansi, fonttext_to_ansi)
     from ._utils import (image_to_ansi, binarize_image, trim_image_border)
-except ImportError as e:
+except ImportError:
     from ..exceptions import ModuleUnavailableError
     raise ModuleUnavailableError(
         "`cobra_color.render` module is unavailable, "
         "optional dependency 'Pillow', `NumPy` are required. "
         "Install it via: pip install cobra-color[render]"
-    ) from e
+    ) from None
 
 __all__ = [
     "imgfile_to_ansi",

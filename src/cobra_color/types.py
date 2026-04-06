@@ -3,9 +3,10 @@
 Type definitions for :pkg:`cobra_color` package.
 """
 
+from __future__ import annotations
 from typing import (Sequence, Union, Literal, Optional, Tuple, Set, Iterable)
 
-
+# FIXME
 T_ColorName = Literal["d", "r", "g", "y", "b", "m", "c", "w", "ld", "lr", "lg", "ly", "lb", "lm", "lc", "lw"]
 T_ColorSpec = Union[T_ColorName, int, Sequence[int]]
 """
