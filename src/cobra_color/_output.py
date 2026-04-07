@@ -17,7 +17,6 @@ try:
 except ImportError:
     richConsole = None
 
-
 _GLOBAL_CONSOLE: Optional[Console] = None  # output function
 
 
@@ -42,11 +41,11 @@ class Console():
     A wrapper for console output functions with preset keyword arguments.
     """
     def __init__(self, func: Callable[..., Any], **kwargs: Any):
-        self.__func = func
-        self.__kwargs = kwargs
+        self._func = func
+        self._kwargs = kwargs
 
     def __call__(self, *args, **kwargs) -> Any:
-        return self.__func(*args, **{**self.__kwargs, **kwargs})
+        return self._func(*args, **{**self._kwargs, **kwargs})
 
 
 def safe_print(

@@ -2,6 +2,7 @@
 # Python version: 3.9
 # @TianZhen
 
+from __future__ import annotations
 from functools import wraps
 import re
 from typing import (Union, Literal, Optional, Sequence, Iterable, Iterator, Tuple, Set, Any, overload)
@@ -9,7 +10,7 @@ from typing import (Union, Literal, Optional, Sequence, Iterable, Iterator, Tupl
 
 # --------------- ANSI Code Utils ---------------
 # code of colors
-__STANDARD_COLOR_MAP = {
+_STANDARD_COLOR_MAP = {
     "d": "0",  # dark/black
     "r": "1",  # red
     "g": "2",  # green
@@ -19,7 +20,7 @@ __STANDARD_COLOR_MAP = {
     "c": "6",  # cyan
     "w": "7",  # white
 }
-__HIGHLIGHT_COLOR_MAP = {
+_HIGHLIGHT_COLOR_MAP = {
     "ld": "0",  # highlight dark/black
     "lr": "1",  # highlight red
     "lg": "2",  # highlight green
@@ -30,7 +31,7 @@ __HIGHLIGHT_COLOR_MAP = {
     "lw": "7",  # highlight white
 }
 # code of styles
-__STYLE_MAP = {
+_STYLE_MAP = {
     "bold": "1",
     "dim": "2",
     "italic": "3",
@@ -42,13 +43,13 @@ __STYLE_MAP = {
     "del": "9",
     "delete": "9"
 }
-__STYLE_CODE = set(__STYLE_MAP.values())
+_STYLE_CODE = set(_STYLE_MAP.values())
 
-__ANSI_RE = re.compile(r"\x1b\[([\d;]+)m")
-__STYLE_RE = re.compile(rf"(?<![34]8;)\b[{''.join(__STYLE_CODE)}]\b")
+_ANSI_RE = re.compile(r"\x1b\[([\d;]+)m")
+_STYLE_RE = re.compile(rf"(?<![34]8;)\b[{''.join(_STYLE_CODE)}]\b")
 # __FG_RE = re.compile(r"[39][0-7]|38;(?:5(?:;\d{1,3})?|2(?:;\d{1,3}){0,3})")
 # __BG_RE = re.compile(r"(?:4|10)[0-7]|48;(?:5(?:;\d{1,3})?|2(?:;\d{1,3}){0,3})")
-__COLOR_RE = re.compile(r"([39][0-7])|((?:4|10)[0-7])")
+_COLOR_RE = re.compile(r"([39][0-7])|((?:4|10)[0-7])")
 
 
 def _fmt_ansicolor(
@@ -83,22 +84,22 @@ def _fmt_ansicolor(
             return (None, _fmt_args("48"))
         else:
             # try basic or highlight color
-            m = __COLOR_RE.fullmatch(code)
+            m = _COLOR_RE.fullmatch(code)
             if m:
                 return (m.group(1), m.group(2))
     return (None, None)
 
 
-def _to_color_code(c: Any, /, is_fg: bool) -> Optional[str]:
+def _to_color_code(c: Any, /, *, is_fg: bool) -> Optional[str]:
     """Parse the color input into ANSI color code."""
     if isinstance(c, str):
         # Basic 8 color OR Light 8 color
-        if c in __STANDARD_COLOR_MAP:  # "d"
+        if c in _STANDARD_COLOR_MAP:  # "d"
             # Basic 8 color. e.g.: 31, 42
-            return ("3" if is_fg else "4") + __STANDARD_COLOR_MAP[c]
-        elif c in __HIGHLIGHT_COLOR_MAP:  # "ld"
+            return ("3" if is_fg else "4") + _STANDARD_COLOR_MAP[c]
+        elif c in _HIGHLIGHT_COLOR_MAP:  # "ld"
             # Light 8 color. e.g.: 91, 102
-            return ("9" if is_fg else "10") + __HIGHLIGHT_COLOR_MAP[c]
+            return ("9" if is_fg else "10") + _HIGHLIGHT_COLOR_MAP[c]
         else:
             # try ANSI color code
             fg, bg = _fmt_ansicolor(iter(c.split(";")))
@@ -132,17 +133,17 @@ def to_style_codes(styles: Any, /) -> Set[str]:
     Parse the styles into ANSI style codes.
     """
     if isinstance(styles, str):
-        if styles in __STYLE_MAP:
+        if styles in _STYLE_MAP:
             # style name
-            return {__STYLE_MAP[styles]}
+            return {_STYLE_MAP[styles]}
         # try ANSI style codes directly
-        return set(__STYLE_RE.findall(styles))
+        return set(_STYLE_RE.findall(styles))
     elif isinstance(styles, Iterable):
         style_codes = styles if isinstance(styles, Set) else set(styles)
-        result = __STYLE_CODE.intersection(style_codes)
+        result = _STYLE_CODE.intersection(style_codes)
         if result:
             return result
-        return {__STYLE_MAP[s] for s in style_codes if s in __STYLE_MAP}
+        return {_STYLE_MAP[s] for s in style_codes if s in _STYLE_MAP}
     return set()
 
 
@@ -156,16 +157,10 @@ def to_str(obj: Any, /) -> str:
 
 @overload
 def loc(len_: int, none: None, _none: None = None, /, offset: int = 0) -> Tuple[Literal[0], int]: ...
-
-
 @overload
 def loc(len_: int, s: slice, _none: None = None, /, offset: int = 0) -> Tuple[int, int, int]: ...
-
-
 @overload
 def loc(len_: int, idx: int, _none: None = None, /, offset: int = 0) -> int: ...
-
-
 @overload
 def loc(len_: int, start: int, end: int, /, offset: int = 0) -> Tuple[int, int]: ...
 

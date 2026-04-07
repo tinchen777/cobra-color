@@ -6,43 +6,28 @@ from __future__ import annotations
 import os
 import importlib.resources as pkg_resources
 from PIL import (Image, ImageDraw, ImageFont)
-from typing import (Tuple, Optional, Any, Union, overload, Literal)
+from typing import (Tuple, Optional, Any, Union, overload, Literal, TYPE_CHECKING)
 
 from . import fonts
 from .fonts import FontName
 from ._utils import (image_to_ansi, binarize_image, trim_image_border)
-from ..types import (T_ImgFillingMode, T_ImgBlockFillingMode)
+
+if TYPE_CHECKING:
+    from ..types import (ImgFillingMode, ImgBlockFillingMode)
 
 
 @overload
-def imgfile_to_ansi(
-    img_path: str,
-    /,
-    width: Optional[int] = None,
-    height: Optional[int] = None,
-    mode: T_ImgBlockFillingMode = "half-color",
-    display: bool = False
-) -> str: ...
-
-
+def imgfile_to_ansi(img_path: str, /, *, width: Optional[int] = ..., height: Optional[int] = ..., mode: ImgBlockFillingMode = ..., display: bool = ...) -> str: ...
 @overload
-def imgfile_to_ansi(
-    img_path: str,
-    /,
-    width: Optional[int] = None,
-    height: Optional[int] = None,
-    mode: Literal["ascii"] = "ascii",
-    display: bool = False,
-    charset: str = "@%#*+=-:. ",
-) -> str: ...
+def imgfile_to_ansi(img_path: str, /, *, width: Optional[int] = ..., height: Optional[int] = ..., mode: Literal["ascii"] = "ascii", display: bool = ..., charset: str = ...) -> str: ...
 
 
 def imgfile_to_ansi(
     img_path: str,
-    /,
+    /, *,
     width: Optional[int] = None,
     height: Optional[int] = None,
-    mode: T_ImgFillingMode = "half-color",
+    mode: ImgFillingMode = "half-color",
     display: bool = False,
     charset: str = "@%#*+=-:. "
 ) -> str:
@@ -80,6 +65,10 @@ def imgfile_to_ansi(
     -------
         str
             String representation of the rendered image.
+
+    Raises
+    ------
+        Refer to :func:`render.image_to_ansi` for possible exceptions.
     """
     img = Image.open(img_path)
 
@@ -95,41 +84,18 @@ def imgfile_to_ansi(
 
 
 @overload
-def fonttext_to_ansi(
-    text: str,
-    /,
-    font: Union[FontName, str] = FontName.LLDISCO,
-    mode: Literal["gray", "half-gray"] = "gray",
-    trim_border: bool = False,
-    threshold: int = 5,
-    font_size: int = 10,
-    size: Optional[Tuple[int, int]] = None,
-    left_top: Tuple[int, int] = (0, 0),
-    display: bool = False
-) -> str: ...
-
-
+def fonttext_to_ansi(text: str, /, *, font: Union[FontName, str] = ..., mode: Literal["gray", "half-gray"], trim_border: bool = ..., threshold: int = ..., font_size: int = ..., size: Optional[Tuple[int, int]] = ..., left_top: Tuple[int, int] = ..., display: bool = ...) -> str: ...
 @overload
-def fonttext_to_ansi(
-    text: str,
-    /,
-    font: Union[FontName, str] = FontName.LLDISCO,
-    mode: Literal["ascii"] = "ascii",
-    trim_border: bool = False,
-    threshold: int = 5,
-    font_size: int = 10,
-    size: Optional[Tuple[int, int]] = None,
-    left_top: Tuple[int, int] = (0, 0),
-    display: bool = False,
-    charset: str = " #"
-) -> str: ...
+def fonttext_to_ansi(text: str, /, *, font: Union[FontName, str] = ..., mode: Literal["ascii"] = "ascii", trim_border: bool = ..., threshold: int = ..., font_size: int = ..., size: Optional[Tuple[int, int]] = ..., left_top: Tuple[int, int] = ..., display: bool = ..., charset: str = ...) -> str: ...
+@overload
+def fonttext_to_ansi(text: str, /, *, font: Union[FontName, str] = ..., mode: Literal["color", "half-color"] = ..., trim_border: bool = ..., threshold: int = ..., font_size: int = ..., size: Optional[Tuple[int, int]] = ..., left_top: Tuple[int, int] = ..., display: bool = ..., charset: str = ..., fore_rgb: Tuple[int, int, int] = ..., back_rgb: Tuple[int, int, int] = ...) -> str: ...
 
 
 def fonttext_to_ansi(
     text: str,
-    /,
+    /, *,
     font: Union[FontName, str] = FontName.LLDISCO,
-    mode: T_ImgFillingMode = "half-color",
+    mode: ImgFillingMode = "half-color",
     trim_border: bool = False,
     threshold: int = 5,
     font_size: int = 10,
@@ -193,6 +159,15 @@ def fonttext_to_ansi(
     -------
         str
             String representation of the rendered colored text.
+
+    Raises
+    --------
+        Refer to :func:`render.image_to_ansi` for possible exceptions.
+
+        FileNotFoundError
+            If the specified font file cannot be found or loaded.
+        ValueError
+            If the :param:`font` parameter is not a valid :class:`FontName` Enum or a valid font file path.
     """
     def _check(size: Any, default: Tuple[int, int], /) -> Tuple[int, int]:
         if (isinstance(size, tuple)

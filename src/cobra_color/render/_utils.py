@@ -5,21 +5,22 @@
 from __future__ import annotations
 from PIL import (Image, ImageChops)
 import numpy as np
-from typing import (Tuple, List, Union, Iterable)
+from typing import (Tuple, List, Union, Iterable, TYPE_CHECKING)
 
 from ..string import to_ansi
 from .._output import safe_print
 from ..exceptions import (ImgFillingModeError, DimensionError)
-from ..types import T_ImgFillingMode
 
+if TYPE_CHECKING:
+    from ..types import ImgFillingMode
 
 VALID_MODES = ("ascii", "color", "half-color", "gray", "half-gray")
 
 
 def image_to_ansi(
     img: Image.Image,
-    /,
-    mode: T_ImgFillingMode = "half-color",
+    /, *,
+    mode: ImgFillingMode = "half-color",
     charset: str = "@%#*+=-:. ",
     display: bool = False
 ) -> str:
@@ -45,6 +46,11 @@ def image_to_ansi(
     -------
         str
             String representation of the rendered image.
+
+    Raises
+    ------
+        ImgFillingModeError
+            If the `mode` parameter is not one of the valid modes.
     """
     if mode not in VALID_MODES:
         raise ImgFillingModeError(f"`mode` parameter of `image_to_ansi()` must be one of {VALID_MODES}, got {mode!r}.")
@@ -116,7 +122,7 @@ def image_to_ansi(
 
 def binarize_image(
     src: Union[Iterable, Image.Image],
-    /,
+    /, *,
     threshold: int = 128,
     upper_rgb: Tuple[int, int, int] = (255, 255, 255),
     lower_rgb: Tuple[int, int, int] = (0, 0, 0)
@@ -127,7 +133,7 @@ def binarize_image(
     Parameters
     ----------
         src : Union[Iterable, Image.Image]
-            The source image data, which can be a 2-D or 3-D array-like structure or a PIL Image.
+            The source image data, which can be a `2-D` or `3-D` array-like structure or a PIL Image.
 
         threshold : int, default to `128`
             The threshold value to binarize the image.
@@ -142,6 +148,11 @@ def binarize_image(
     -------
         Image.Image
             A PIL Image representing the binary image with specified RGB colors.
+
+    Raises
+    ------
+        DimensionError
+            If the input :param:`src` does not have valid dimensions for a grayscale or RGB image.
     """
     if isinstance(src, Image.Image):
         # as a PIL Image

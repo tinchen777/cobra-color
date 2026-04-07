@@ -4,20 +4,23 @@
 
 from __future__ import annotations
 import warnings
-from typing import (Union, Optional, Sequence, Iterable, Dict, Tuple, Set, List, Any, Literal, final)
+from typing import (Union, Optional, Sequence, Iterable, Dict, Tuple, Set, List, Any, Literal, final, TYPE_CHECKING)
 
 from ._utils import (
-    __ANSI_RE,
-    __STYLE_CODE,
+    _ANSI_RE,
+    _STYLE_CODE,
     _fmt_ansicolor,
     to_fgcode,
     to_bgcode,
     to_style_codes,
     loc
 )
-from ._extension import (to_ExtStr, ExtStr)
+from ._extension import to_ExtStr
 from ..exceptions import (ParameterIgnoredWarning, CobraColorError)
-from ..types import (T_ColorSpec, T_ColorTrans, T_StyleTrans, T_StyleSpec)
+
+if TYPE_CHECKING:
+    from ._extension import ExtStr
+    from ..types import (ColorSpec, ColorTrans, StyleTrans, StyleSpec)
 
 
 def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
@@ -33,7 +36,7 @@ def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
 
     new_segments: List[ColorSeg] = []
     last_idx = 0
-    for m in __ANSI_RE.finditer(ansi):
+    for m in _ANSI_RE.finditer(ansi):
         start, end = m.span()
         # text before ANSI code
         if start > last_idx:
@@ -45,7 +48,7 @@ def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
                 # reset all
                 cur_fg = cur_bg = ""
                 cur_styles = set()
-            elif code in __STYLE_CODE:
+            elif code in _STYLE_CODE:
                 # style code
                 cur_styles.add(code)
             else:
@@ -71,9 +74,9 @@ class ColorSeg:
         cls,
         str_: Any,
         /,
-        fg: Optional[T_ColorSpec] = None,
-        bg: Optional[T_ColorSpec] = None,
-        styles: Optional[T_StyleSpec] = None
+        fg: Optional[ColorSpec] = None,
+        bg: Optional[ColorSpec] = None,
+        styles: Optional[StyleSpec] = None
     ):
         """
         Create a **`Segment`** from a string with specified pattern.
@@ -301,9 +304,9 @@ class ColorSeg:
 
     def _update(
         self,
-        fg: Optional[Union[Sequence[T_ColorTrans], str]] = None,
-        bg: Optional[Union[Sequence[T_ColorTrans], str]] = None,
-        styles: Optional[Sequence[T_StyleTrans]] = None
+        fg: Optional[Union[Sequence[ColorTrans], str]] = None,
+        bg: Optional[Union[Sequence[ColorTrans], str]] = None,
+        styles: Optional[Sequence[StyleTrans]] = None
     ):
         """Update the pattern of the **`Segment`** based on the provided mapping rules."""
         try:

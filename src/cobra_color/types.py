@@ -6,9 +6,8 @@ Type definitions for :pkg:`cobra_color` package.
 from __future__ import annotations
 from typing import (Sequence, Union, Literal, Optional, Tuple, Set, Iterable)
 
-# FIXME
-T_ColorName = Literal["d", "r", "g", "y", "b", "m", "c", "w", "ld", "lr", "lg", "ly", "lb", "lm", "lc", "lw"]
-T_ColorSpec = Union[T_ColorName, int, Sequence[int]]
+ColorName = Literal["d", "r", "g", "y", "b", "m", "c", "w", "ld", "lr", "lg", "ly", "lb", "lm", "lc", "lw"]
+ColorSpec = Union[ColorName, int, Sequence[int]]
 """
 `(Color Specification Type)`. Includes one of the following:
 
@@ -22,12 +21,12 @@ T_ColorSpec = Union[T_ColorName, int, Sequence[int]]
 
     NOTE: Each value should be in range `0-255`, representing `R`, `G`, `B` respectively.
 """
-T_ColorMatch = Optional[Union[str, int, Sequence[int]]]
-T_ColorTrans = Tuple[Optional[str], Optional[str]]
-T_ColorDesc = Union[T_ColorSpec, Sequence[Tuple[T_ColorMatch, T_ColorMatch]]]
+ColorMatch = Optional[Union[str, int, Sequence[int]]]
+ColorTrans = Tuple[Optional[str], Optional[str]]
+ColorDesc = Union[ColorSpec, Sequence[Tuple[ColorMatch, ColorMatch]]]
 
-T_StyleName = Literal["bold", "dim", "italic", "udl", "underline", "blink", "selected", "disappear", "del", "delete"]
-T_StyleSpec = Union[T_StyleName, str, Iterable[str]]
+StyleName = Literal["bold", "dim", "italic", "udl", "underline", "blink", "selected", "disappear", "del", "delete"]
+StyleSpec = Union[StyleName, str, Iterable[str]]
 """
 `(Style Specification Type)`. Includes one of the following:
 
@@ -40,9 +39,9 @@ T_StyleSpec = Union[T_StyleName, str, Iterable[str]]
 
 - _Iterable(str)_: An iterable of `Text style` names OR `style code` numbers.
 """
-T_StyleMatch = Optional[Union[str, Iterable[str]]]
-T_StyleTrans = Tuple[Optional[Union[Set[str], Literal["all"]]], Optional[Set[str]]]
-T_StyleDesc = Union[T_StyleSpec, Sequence[Tuple[T_StyleMatch, T_StyleMatch]]]
+StyleMatch = Optional[Union[str, Iterable[str]]]
+StyleTrans = Tuple[Optional[Union[Set[str], Literal["all"]]], Optional[Set[str]]]
+StyleDesc = Union[StyleSpec, Sequence[Tuple[StyleMatch, StyleMatch]]]
 
-T_ImgFillingMode = Literal["ascii", "color", "half-color", "gray", "half-gray"]
-T_ImgBlockFillingMode = Literal["color", "half-color", "gray", "half-gray"]
+ImgFillingMode = Literal["ascii", "color", "half-color", "gray", "half-gray"]
+ImgBlockFillingMode = Literal["color", "half-color", "gray", "half-gray"]

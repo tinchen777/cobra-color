@@ -4,13 +4,15 @@
 
 from __future__ import annotations
 from functools import (cached_property, wraps)
-from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Union, final)
+from typing import (Any, List, Tuple, Optional, Sequence, Iterable, Literal, Union, final, TYPE_CHECKING)
 
 from ._extension import (ExtStr, to_ExtStr)
 from ._segment import (ColorSeg, ansi_to_segments)
 from ._utils import (wrap_exc, to_fgcode, to_bgcode, to_style_codes, loc)
 from ..exceptions import NotFoundError
-from ..types import (T_ColorSpec, T_ColorDesc, T_StyleDesc, T_StyleSpec)
+
+if TYPE_CHECKING:
+    from ..types import (ColorSpec, ColorDesc, StyleDesc, StyleSpec)
 
 
 def to_plain(obj: Any, default: Optional[str] = None, /) -> ExtStr:
@@ -50,9 +52,9 @@ def to_segments(obj: Any, /) -> List[ColorSeg]:
 
 def cstr(
     *objects: Any,
-    fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-    bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-    styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None,
+    fg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+    bg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+    styles: Optional[Union[StyleDesc, Literal["clear"]]] = None,
     sep: Any = ""
 ) -> ColorStr:
     """
@@ -134,9 +136,9 @@ def cstr(
 def to_ansi(
     object: Any,
     /,
-    fg: Optional[T_ColorSpec] = None,
-    bg: Optional[T_ColorSpec] = None,
-    styles: Optional[T_StyleSpec] = None
+    fg: Optional[ColorSpec] = None,
+    bg: Optional[ColorSpec] = None,
+    styles: Optional[StyleSpec] = None
 ) -> ExtStr:
     """
     Convert an object to an ANSI formatted **`Extended String`** with specified pattern.
@@ -208,9 +210,9 @@ class ColorStr(ExtStr):
         cls,
         str_: Any,
         /,
-        fg: Optional[T_ColorSpec] = None,
-        bg: Optional[T_ColorSpec] = None,
-        styles: Optional[T_StyleSpec] = None
+        fg: Optional[ColorSpec] = None,
+        bg: Optional[ColorSpec] = None,
+        styles: Optional[StyleSpec] = None
     ):
         """
         Create a **`Color String`** from a single string.
@@ -278,9 +280,9 @@ class ColorStr(ExtStr):
         self,
         apply_range: Optional[slice] = None,
         /,
-        fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-        bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-        styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
+        fg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+        bg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+        styles: Optional[Union[StyleDesc, Literal["clear"]]] = None
     ):
         """
         Rebuild A new **`Color String`** according to the specified mapping rules.
@@ -749,9 +751,9 @@ class ColorStr(ExtStr):
 
     def _update(
         self,
-        fg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-        bg: Optional[Union[T_ColorDesc, Literal["clear", ""]]] = None,
-        styles: Optional[Union[T_StyleDesc, Literal["clear"]]] = None
+        fg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+        bg: Optional[Union[ColorDesc, Literal["clear", ""]]] = None,
+        styles: Optional[Union[StyleDesc, Literal["clear"]]] = None
     ):
         """Update the pattern mapping of the **`Color String`** in place.
 
