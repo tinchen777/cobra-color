@@ -37,7 +37,7 @@ class ExtStr(str):
         sub: Any,
         start: int = 0,
         end: Optional[int] = None,
-        /,
+        /, *,
         limit: int = -1
     ) -> List[int]:
         """
@@ -62,14 +62,14 @@ class ExtStr(str):
             List[int]
                 A list of starting indices where the substring is found.
         """
-        return list(self._search(to_str(sub), start, end, limit))
+        return list(self._search(to_str(sub), start, end, limit=limit))
 
     def rfindall(
         self,
         sub: Any,
         start: int = 0,
         end: Optional[int] = None,
-        /,
+        /, *,
         limit: int = -1
     ) -> List[int]:
         """
@@ -79,7 +79,7 @@ class ExtStr(str):
         -----
         - All parameters follow the usage conventions of :meth:`ExtStr.findall`.
         """
-        indices = list(self._search(to_str(sub), start, end, limit, True))
+        indices = list(self._search(to_str(sub), start, end, limit=limit, reverse=True))
         indices.reverse()
         return indices
 
@@ -88,7 +88,7 @@ class ExtStr(str):
         sub: str,
         start: int = 0,
         end: Optional[int] = None,
-        /,
+        /, *,
         limit: int = -1,
         reverse: bool = False
     ):

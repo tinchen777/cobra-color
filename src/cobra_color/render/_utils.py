@@ -50,7 +50,7 @@ def image_to_ansi(
     Raises
     ------
         ImgFillingModeError
-            If the `mode` parameter is not one of the valid modes.
+            If the :param:`mode` parameter is not one of the valid modes.
     """
     if mode not in VALID_MODES:
         raise ImgFillingModeError(f"`mode` parameter of `image_to_ansi()` must be one of {VALID_MODES}, got {mode!r}.")

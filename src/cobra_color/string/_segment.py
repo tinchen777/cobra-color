@@ -119,7 +119,7 @@ class ColorSeg:
         self,
         other: Any,
         at: Optional[slice] = None,
-        /,
+        /, *,
         real_index: bool = False,
         flags: Tuple[Literal["plain", "fg", "bg", "styles"], ...] = ("plain", "fg", "bg", "styles")
     ) -> bool:
@@ -213,7 +213,7 @@ class ColorSeg:
     def to_subseg(
         self,
         sub_range: slice,
-        /,
+        /, *,
         real_index: bool = False
     ) -> Tuple[ColorSeg, ColorSeg, ColorSeg]:
         """

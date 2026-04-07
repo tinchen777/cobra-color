@@ -330,7 +330,7 @@ class ColorStr(ExtStr):
     def apply(
         self,
         text: Any,
-        /,
+        /, *,
         start_idx: int = 0,
         extend: Optional[Literal["left", "right", "all"]] = None,
         _from_left: bool = True
@@ -357,6 +357,11 @@ class ColorStr(ExtStr):
         -------
             ColorStr
                 A new **`Color String`** with the applied pattern.
+
+        Raises
+        ------
+            TypeError
+                If :param:`start_idx` is not an integer.
         """
         c_text = to_cstr(text)
         # text length
@@ -403,12 +408,16 @@ class ColorStr(ExtStr):
     def rapply(
         self,
         text: Any,
-        /,
+        /, *,
         start_idx: int = 0,
         extend: Optional[Literal["left", "right", "all"]] = None
     ) -> ColorStr:
         """
         Apply the pattern of the **`Color String`** to another object from the `right`.
+
+        Raises
+        ------
+            Refer to :meth:`ColorStr.apply` for possible exceptions.
 
         Notes
         -----
@@ -421,7 +430,7 @@ class ColorStr(ExtStr):
         sub: Any,
         start: int = 0,
         end: Optional[int] = None,
-        /,
+        /, *,
         limit: int = -1,
         _reverse: bool = False
     ) -> List[int]:
@@ -477,7 +486,7 @@ class ColorStr(ExtStr):
         sub: Any,
         start: int = 0,
         end: Optional[int] = None,
-        /,
+        /, *,
         limit: int = -1
     ) -> List[int]:
         """
@@ -552,7 +561,7 @@ class ColorStr(ExtStr):
         self,
         index: int,
         sub: Any,
-        /,
+        /, *,
         overwrite: bool = False,
         keep_pattern: bool = True
     ) -> ColorStr:
