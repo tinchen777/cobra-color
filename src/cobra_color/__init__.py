@@ -64,7 +64,7 @@ from .string import (cstr, to_ansi)
 from ._output import (safe_print, set_console)
 
 __author__ = "Zhen Tian"
-__version__ = "1.3.12"
+__version__ = "1.3.13"
 
 __all__ = [
     "cstr",
