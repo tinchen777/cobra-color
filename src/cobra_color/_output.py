@@ -79,7 +79,19 @@ def safe_print(
         console : Optional[Union[Callable[..., Any], ConsoleFunc]], default to `None`
             A console output function or method to use for printing.
             - `None`: Use the global console if set;
-            - `Callable[..., Any]` or :class:`ConsoleFunc`: Use the provided function.
+            - `Callable[..., Any]` or :class:`ConsoleFunc`: Use the provided function, which should accept string input as the first argument and a `end` keyword argument for line ending.
+
+    Examples
+    --------
+    >>> from cobra_color import safe_print
+    >>> safe_print("Hello World!")
+    Hello World!
+
+    >>> def echo(message, end):
+    ...     print(f"[console] {message}{end}")
+    ...
+    >>> safe_print("Hello", "World", console=echo)
+    [console] Hello World
     """
     # determine output function and kwargs
     func = None

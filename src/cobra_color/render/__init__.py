@@ -16,6 +16,20 @@ Functions
 Classes
 -------
 - :class:`FontName`: Enum for built-in font names.
+
+Examples
+--------
+- Render an image file as ASCII art::
+
+    from cobra_color.render import imgfile_to_ansi
+
+    preview = imgfile_to_ansi("example.jpg", mode="ascii", width=40)
+
+- Render font text using a built-in font::
+
+    from cobra_color.render import FontName, fonttext_to_ansi
+
+    preview = fonttext_to_ansi("Hello World!", font=FontName.LLDISCO, mode="half-color")
 """
 
 from .fonts import FontName
@@ -26,7 +40,7 @@ except ImportError:
     from ..exceptions import ModuleUnavailableError
     raise ModuleUnavailableError(
         "`cobra_color.render` module is unavailable, "
-        "optional dependency 'Pillow', `NumPy` are required. "
+        "optional dependency `Pillow`, `NumPy` are required. "
         "Install it via: pip install cobra-color[render]"
     ) from None
 

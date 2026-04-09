@@ -9,6 +9,40 @@ Functions
 ---------
 - :func:`fmt_dict`: Format and display a dictionary or object's attributes in a structured manner.
 - :func:`fmt_list`: Format and display a list in a structured manner.
+
+Examples
+--------
+- Format a dictionary and hide sensitive fields::
+
+    from cobra_color.format import fmt_dict
+
+    data = {
+        "user": "alice",
+        "token": "secret-token",
+        "roles": ["admin", "editor"]
+    }
+
+    # `display=False` returns the formatted text without printing it.
+    output = fmt_dict(data, title="User Profile", omits=["token"], display=False)
+    print(output)
+
+- Format a class instance::
+
+    class Config:
+        def __init__(self):
+            self.host = "127.0.0.1"
+            self.port = 8080
+            self._api_key = "xxx"
+
+    cfg = Config()
+    fmt_dict(cfg, title="Runtime Config", omits=["api_key"])
+
+- Format a list for readable terminal output::
+
+    from cobra_color.format import fmt_list
+
+    tasks = ["build", "test", "deploy"]
+    fmt_list(tasks)
 """
 
 from typing import (Any, Mapping, Sequence, List)

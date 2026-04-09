@@ -66,6 +66,20 @@ def ansi_to_segments(ansi: Any, /) -> List[ColorSeg]:
 class ColorSeg:
     """
     A class of string **`{Segment}`** with pattern.
+
+    Examples
+    --------
+    >>> from cobra_color.string import ColorSeg
+    >>> seg = ColorSeg.from_raw("Hello", fg="r", styles={"bold"})
+    >>> repr(seg)
+    "Seg(plain='Hello',fg='31',bg='',styles={'bold'}) @ [0,5)"
+
+    >>> copied = seg.copy(istart=3)
+    >>> copied.istart
+    3
+
+    >>> seg.to_ansi().endswith("\x1b[0m")
+    True
     """
     _START_IDX: int
 
@@ -368,11 +382,31 @@ class ColorSeg:
                 - `"fg"`: PRIORITY & EXCLUSIVITY. The new foreground color code to replace the original one;
                 - `"@fg"`: The new foreground color code to replace the original one if the original foreground color code matches the specified target;
                 - `"-fg"`: The new foreground color code to be removed if the original foreground color code matches the specified target;
-                - `"+fg"`: The new foreground color code to be added if the original foreground color code matches the specified target.
+                - `"+fg"`: The new foreground color code to be added if the original foreground color code not exists.
                 3. background color. Usage is similar to `foreground color`.
                 - `"bg"`, `"@bg"`, `"-bg"`, `"+bg"`.
                 4. styles. Usage is similar to `foreground color`
                 - `"styles"`, `"@styles"`, `"-styles"`, `"+styles"`, where the value should be a set of style codes or the string `"all"` to indicate all styles.
+
+        Examples
+        --------
+        >>> from cobra_color.string import ColorSeg
+        >>> seg = ColorSeg.from_raw("Hello", fg="r", styles={"bold"})
+        >>> new_seg = seg % ("World", None, None, None, 5)
+        >>> repr(new_seg)
+        "Seg(plain='World',fg='31',bg='',styles={'bold'}) @ [5,10)"
+
+        >>> seg = ColorSeg.from_raw("Hello", fg="r", bg="", styles={"bold"})
+        >>> new_seg = seg % {
+        ...     "+plain": " World",
+        ...     "fg": "g",
+        ...     "+bg": "b",
+        ...     "-styles": {"bold"},
+        ...     "+styles": {"udl"},
+        ...     "start": 2,
+        ... }
+        >>> repr(new_seg)
+        "Seg(plain='Hello World',fg='32',bg='44',styles={'udl'}) @ [2,13)"
         """
         if isinstance(args, Tuple):
             args = dict(zip(("plain", "fg", "bg", "styles", "start"), args))

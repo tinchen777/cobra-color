@@ -19,6 +19,16 @@ def to_ExtStr(obj: Any, /) -> ExtStr:
 class ExtStr(str):
     """
     A class of **`{Extended String}`** extends the built-in :class:`str` class.
+
+    Examples
+    --------
+    >>> from cobra_color.string import ExtStr
+    >>> text = ExtStr("banana")
+    >>> text.findall("an")
+    [1, 3]
+
+    >>> ExtStr.from_iter("Hello", " ", "World")
+    'Hello World'
     """
     _is_fg_colored: bool = False
     _is_bg_colored: bool = False

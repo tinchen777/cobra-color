@@ -69,6 +69,13 @@ def imgfile_to_ansi(
     Raises
     ------
         Refer to :func:`render.image_to_ansi` for possible exceptions.
+
+    Examples
+    --------
+    >>> from cobra_color.render import imgfile_to_ansi
+    >>> imgfile_to_ansi("example.jpg", mode="ascii", width=40, display=True)
+
+    >>> imgfile_to_ansi("example.jpg", mode="half-color", width=40, display=True)
     """
     img = Image.open(img_path)
 
@@ -168,6 +175,13 @@ def fonttext_to_ansi(
             If the specified font file cannot be found or loaded.
         ValueError
             If the :param:`font` parameter is not a valid :class:`FontName` Enum or a valid font file path.
+
+    Examples
+    --------
+    >>> from cobra_color.render import FontName, fonttext_to_ansi
+    >>> preview = fonttext_to_ansi("Hello World!", font=FontName.LLDISCO, mode="ascii", display=False)
+
+    >>> preview = fonttext_to_ansi("Hello World!", font="your_font.ttf", mode="half-color", trim_border=True, display=False)
     """
     def _check(size: Any, default: Tuple[int, int], /) -> Tuple[int, int]:
         if (isinstance(size, tuple)

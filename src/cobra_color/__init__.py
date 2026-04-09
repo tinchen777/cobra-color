@@ -3,7 +3,7 @@
 cobra-color
 ===========
 
-A lightweight and easy-to-use Python package for terminal display enhancements.
+A lightweight, easy-to-use Python library for enhanced terminal output, combining string-friendly color styling with one-step ANSI image rendering.
 
 Modules
 -------
@@ -19,14 +19,12 @@ Functions
 
 Examples
 --------
-
-Render a text in the terminal::
+- Render a text in the terminal::
 
     from cobra_color import cstr, safe_print
 
     c_text_1 = cstr("Hello World!", fg="r", styles=["bold"])
-    # Print directly from the terminal
-    print(c_text_1)
+    print(c_text_1)  # Print directly from the terminal
 
     c_text_2 = cstr("Hello World!", fg=(255, 255, 255), styles=["udl", "bold"])
     # Alternatively, you can use `safe_print()` to automatically support progress bar modes like tqdm and rich.
@@ -38,7 +36,7 @@ Render a text in the terminal::
     # You can continue to use str's proprietary functions and keep the existing colors and styles.
     c_text_1.upper()
 
-Render an image in the terminal:
+- Render an image in the terminal::
 
     from cobra_color.render import imgfile_to_ansi, safe_print
 
@@ -48,7 +46,7 @@ Render an image in the terminal:
     # Half-block color (recommended for truecolor terminals)
     imgfile_to_ansi("example.jpg", width=80, mode="half-color", display=True)
 
-Render some text with fonts in the terminal:
+- Render some text with fonts in the terminal::
 
     from cobra_color.draw import fonttext_to_ansi, FontName, safe_print
 
@@ -65,7 +63,7 @@ from .string import (cstr, to_ansi)
 from ._output import (safe_print, set_console)
 
 __author__ = "Zhen Tian"
-__version__ = "1.3.11"
+__version__ = "1.3.12"
 
 __all__ = [
     "cstr",

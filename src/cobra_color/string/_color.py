@@ -110,21 +110,23 @@ def cstr(
 
     Examples
     --------
-    1. Create a simple colored string.
+    >>> from cobra_color.string import cstr
+
+    - Create a simple colored string.
     >>> cstr("\\x1b[4m下划线\\x1b[0m")
 
-    2. Create a colored string with foreground color, background color or styles.
+    - Create a colored string with foreground color, background color or styles.
     >>> cstr("Hello World!", fg="r", styles=["bold", "udl"])
 
-    3. Rebuild a colored string with mapping rules.
+    - Rebuild a colored string with mapping rules.
     >>> cstr(
-    >>>     c_str,
-    >>>     fg=[("r", "lg"), (None, (255, 1, 92))],
-    >>>     bg="",
-    >>>     styles=[("del", None), (None, ["bold", "udl"])]
-    >>> )
+    ...     c_str,
+    ...     fg=[("r", "lg"), (None, (255, 1, 92))],
+    ...     bg="",
+    ...     styles=[("del", None), (None, ["bold", "udl"])]
+    ... )
 
-    4. Combine multiple objects into a colored string with sep.
+    - Combine multiple objects into a colored string with sep.
     >>> cstr("a", c_str, 1243, sep=cstr("sep", fg="y"))
     """
     c_str = ColorStr.from_iter(*objects, sep=sep)
@@ -135,7 +137,7 @@ def cstr(
 
 def to_ansi(
     object: Any,
-    /,
+    /, *,
     fg: Optional[ColorSpec] = None,
     bg: Optional[ColorSpec] = None,
     styles: Optional[StyleSpec] = None
@@ -151,6 +153,16 @@ def to_ansi(
     Notes
     -----
     - All parameters follow the usage conventions of :func:`cstr`.
+
+    Examples
+    --------
+    >>> from cobra_color.string import to_ansi
+    >>> text = to_ansi("Hello", fg="r", styles={"bold"})
+    >>> text.startswith("\\x1b[") and text.endswith("\\x1b[0m")
+    True
+
+    >>> to_ansi("Hello")
+    'Hello'
     """
     if fg is None and bg is None and styles is None:
         return to_plain(object)
@@ -201,6 +213,49 @@ def _clip_method(func):
 class ColorStr(ExtStr):
     """
     A class of **`{Color String}`** that extends :class:`ExtStr`, with perfect support for :class:`str`, containing :class:`ColorStr` versions of almost all native :class:`str` features.
+
+    Examples
+    --------
+    >>> from cobra_color.string import ColorStr
+
+    - Create a colored string from a plain string using :meth:`ColorStr.from_str`:
+
+    >>> cs = ColorStr.from_str("Hello World")
+    >>> cs.plain
+    'Hello World'
+
+    - Concatenate two colored strings with different patterns:
+
+    >>> hello = ColorStr.from_str("Hello", fg="r", styles={"bold"})
+    >>> world = ColorStr.from_str(" World", fg="g")
+    >>> text = hello + world
+    >>> text.plain
+    'Hello World'
+
+    - A concatenated string spans multiple segments:
+
+    >>> text.iscombined
+    True
+    >>> len(text.pieces())
+    2
+
+    - Find all occurrences of a substring (use :meth:`ColorStr.apply` to create a string with same pattern):
+
+    >>> text.findall(world("l"))
+    [9]
+
+    - Case conversion preserves the color pattern:
+
+    >>> text.upper().plain
+    'HELLO WORLD'
+    >>> text.lower().plain
+    'hello world'
+
+    - Split on a separator, preserving each part's color:
+
+    >>> parts = text.split(" ")
+    >>> [p for p in parts]
+    ['\\x1b[1;31mHello\\x1b[0m', '\\x1b[;32mWorld\\x1b[0m']
     """
     _SEGMENTS: List[ColorSeg]
     _plain: ExtStr
