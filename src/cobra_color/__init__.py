@@ -10,6 +10,7 @@ Modules
 - :mod:`cobra_color.string`: Colored string manipulation and generation.
 - :mod:`cobra_color.render`: Rendering utilities for rendering text and images in the terminal.
 - :mod:`cobra_color.format`: Formatting utilities for structured data display.
+
 Functions
 ---------
 - :func:`cstr`: Generate an easy-to-use `rich str` instance with perfect support for :class:`str`.

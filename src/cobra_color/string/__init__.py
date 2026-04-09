@@ -9,6 +9,7 @@ Functions
 - :func:`to_plain`: Convert an object to a plain :class:`str`.
 - :func:`to_cstr`: Convert an object to a :class:`ColorStr`.
 - :func:`ansi_to_segments`: Parse an ANSI formatted string into a list of :class:`ColorSeg` segments.
+
 Classes
 -------
 - :class:`ColorStr`: An easy-to-use `rich str` class with perfect support for :class:`str`.
